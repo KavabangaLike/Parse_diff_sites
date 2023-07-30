@@ -1,4 +1,5 @@
 import datetime
+import multiprocessing
 import random
 import threading
 import sqlite3
@@ -121,21 +122,23 @@ def get_product_info(product_link):
     print(product_link)
 
     sleep(3)
+    driver.close()
+    driver.quit()
     return [product_link, title, price, area, product_type, rooms, description, profile_url, pictures, current_datetime]
 
 
-def scroll_site(tac):
+def scroll_site(max_scrolls):
     # driver.get('https://www.facebook.com/marketplace/107677462599905/search?query=property')
-    curr_count, tic = 0, 0
-    while tic <= tac:
-        print(tic, tac)
+    curr_count, curr_scrolls = 0, 0
+    while curr_scrolls <= max_scrolls:
+        print(curr_scrolls, max_scrolls)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         sleep(5)
         links_count = len(driver.find_elements(By.TAG_NAME, 'a'))
         if links_count <= curr_count:
             break
         curr_count = links_count
-        tic += 1
+        curr_scrolls += 1
     return None
 
 p = [
@@ -152,7 +155,7 @@ p = [
         'https://www.facebook.com/marketplace/item/904386110787244/?ref=search&referral_code=null&referral_story_type=post&tracking=browse_serp%3A42548dfa-3503-4370-89dc-9783d40c0f3c&__tn__=!%3AD'
 ]
 
-while ...:
+# while ...:
     # enter_facebook()
     # driver.get(
     #     'https://www.facebook.com/marketplace/112356482109204/search?sortBy=creation_time_descend&query=house%20for%20sale&exact=false'
@@ -164,22 +167,41 @@ while ...:
     #         file_w.write(f'{link}\n')
     # break
     #
-    with open('links.txt', 'r', encoding='utf-8') as file_r:
-        links = file_r.read().split('\n')
-    enter_facebook()
-    for url in links:
-        sql_insert = 'INSERT INTO products(id, product_link, title, price, area, product_type, rooms, description, profile_url, pictures, current) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        data = get_product_info(url)
-        cu.execute(sql_insert, (random.randint(123, 32542), data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
-        cx.commit()
-        sleep(4)
+
+
+    # with open('links.txt', 'r', encoding='utf-8') as file_r:
+    #     links = file_r.read().split('\n')
+    #
+    # def get_data(url):
+    #     enter_facebook()
+    #
+    #     # for url in links:
+    #sql_insert = 'INSERT INTO products(id, product_link, title, price, area, product_type, rooms, description, profile_url, pictures, current) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    #     data = get_product_info(url)
+    #     cu.execute(sql_insert, (random.randint(1, 32542), data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
+    #     cx.commit()
+    #     sleep(4)
+    #
+    # p = multiprocessing.Pool(processes=3)
+    # p.map(get_data, links)
+    # sleep(100)
 
 
 # enter_facebook()
-# data = [["id", "product_link", 'title', 'price', 'area', 'product_type', 'rooms', 'description', 'profile_url', 'pictures', 'is_active']]
+data = [["id", "product_link", 'title', 'price', 'area', 'product_type', 'rooms', 'description', 'profile_url', 'pictures', 'is_active']]
 # for c, url in enumerate(p):
 #     product = [str(i) for i in get_product_info(url)]
 #     product.insert(0, str(c + 1))
 #     data.append(product)
 #
 #     quickstart.gh_insert([product], c + 2)
+
+
+cx = sqlite3.connect('db.sqlite3')
+cur = cx.cursor()
+
+sql_selct = 'SELECT * FROM products'
+quickstart.gh_insert(data, 1)
+for num, row in enumerate(cu.execute(sql_selct)):
+    row = [str(i) for i in row]
+    quickstart.gh_insert([row], num + 2)

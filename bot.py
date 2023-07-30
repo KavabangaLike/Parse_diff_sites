@@ -43,6 +43,6 @@ async def start_command(message: types.Message):
         mes = f'<b>{"🔹".join([f" {i} " for i in row[3:7] if i])}</b>\nОписание: {row[7][:250] + " ..." if len(row[7]) > 250 else row[7]}\n<i>актуально на {row[10]}</i>'
         await message.answer(text=mes, reply_markup=InlineKeyboards(row[1], row[8]).product_more_buttons(),
                              disable_web_page_preview=True, parse_mode='HTML')
-        asyncio.sleep(1)
+        await asyncio.sleep(1)
 
 executor.start_polling(dp)
