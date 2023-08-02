@@ -64,9 +64,6 @@ def pg_insert_new_user(user_id: str, role='user'):
         session.refresh(user)
 
 
-# for user in ['57360326', '713316561']:
-#     pg_insert_new_user(user)
-
 def pg_select_all_users_id():
     with Users.session() as session:
         query = select(Users.user_id)

@@ -5,28 +5,24 @@ from database import DataBase, pg_insert_product, pg_select_product_links
 from time import sleep
 from src.handlers import handlers
 import asyncio
-
-fb_search_urls = [
-    'https://www.facebook.com/marketplace/112356482109204/search/?sortBy=creation_time_descend&query=property&exact=false',
-    'https://www.facebook.com/marketplace/112356482109204/search?query=rent%20villa',
-    'https://www.facebook.com/marketplace/109241542435052/search/?sortBy=creation_time_descend&query=property&exact=false',
-    'https://www.facebook.com/marketplace/philly/search/?sortBy=creation_time_descend&query=property&exact=false',
-    'https://www.facebook.com/marketplace/guatemalacity/search/?query=rent%20villa&exact=false',
-    'https://www.facebook.com/marketplace/lisbon/search/?query=rent%20villa&exact=false']
+from uses import urls_for_parser
 
 
-def start_parse(fb_search_url: str) -> None:
-    urls_from_search = get_urls(get_response(fb_search_url))
+def start_parse(fb_search_url: str, cookie: str, geo: str = None, query: str = None) -> None:
+    urls_from_search = get_urls(get_response(fb_search_url, cookie=cookie))
     urls_id_db = pg_select_product_links()
     urls_to_parse = []
     # print(urls_from_search)
     for url in urls_from_search:
         if url.split('/')[5] not in urls_id_db:
             urls_to_parse.append(url)
-    print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}Total: {len(urls_from_search)} New: {len(urls_to_parse)}')
+    print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
+          f'{geo} - '
+          f'Total: {len(urls_from_search)} New: {len(urls_to_parse)}'
+          f' - {query}')
     if urls_to_parse:
         for url in urls_to_parse:
-            data = get_product_info(get_response(url))
+            data = get_product_info(get_response(url, cookie=cookie))
             if data:
                 data = [url] + data
                 pg_insert_product(data)
@@ -43,18 +39,12 @@ def start_parse(fb_search_url: str) -> None:
             else:
                 print(f'No incoming data !!! from {url}')
     sleep(random.uniform(25.0, 45.0))
-        #     tic += 1
-        #
-        # urls_to_check = DataBase.get('product_link', 'products WHERE is_active=1')
-        # for url in urls_to_check:
-        #     if_url_active(get_response(url))
-        # sleep(50)
 
 
 def main():
     while ...:
-        for link in fb_search_urls:
-            start_parse(link)
+        for link in urls_for_parser:
+            start_parse(link[2], link[3], link[0], link[1])
 
 
 if __name__ == "__main__":
