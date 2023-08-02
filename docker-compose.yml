@@ -4,7 +4,7 @@ services:
 
   bot:
     build: .
-    command: sh -c "alembic upgrade head && python bot.py"
+    command: sh -c "alembic upgrade head && python bot.py & python app.py"
     container_name: fb-bot
     volumes:
       - .:/bot
