@@ -1,4 +1,6 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+# from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types.inline_keyboard_markup import InlineKeyboardMarkup
+from aiogram.types.inline_keyboard_button import InlineKeyboardButton
 
 
 class InlineKeyboards:
@@ -6,8 +8,8 @@ class InlineKeyboards:
         self.url1 = url1
         self.url2 = url2
 
-    def product_more_buttons(self):
+    def product_more_buttons(self) -> InlineKeyboardMarkup:
         ikb1 = InlineKeyboardButton(text='Подробнее', url=self.url1)
         ikb2 = InlineKeyboardButton(text='Продавец', url=self.url2)
-        return InlineKeyboardMarkup().add(ikb2, ikb1)
+        return InlineKeyboardMarkup(inline_keyboard=[[ikb2, ikb1]])
 
