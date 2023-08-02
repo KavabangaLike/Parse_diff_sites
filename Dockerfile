@@ -9,4 +9,6 @@ ENV PYTHONUNBUFFERED 1
 
 RUN pip install --no-cache-dir --upgrade -r /bot/requirements.txt
 
+CMD ["python", "app.py"]
+
 COPY . /bot
