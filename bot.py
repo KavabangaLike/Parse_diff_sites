@@ -1,6 +1,8 @@
 import logging
 from src.settings import dp, bot
+from threading import Thread
 import asyncio
+import app
 from src.handlers import handlers
 
 logging.basicConfig(level=logging.INFO)
@@ -42,4 +44,11 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    # asyncio.run(main())
+    threads = [Thread(target=asyncio.run(main())), Thread(target=app.main())]
+    for thread in threads:
+        print(1)
+        thread.start()
+    print(2)
+    for thread in threads:
+        thread.join()

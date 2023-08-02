@@ -50,6 +50,7 @@ def start_parse(fb_search_url: str) -> None:
         #     if_url_active(get_response(url))
         # sleep(50)
 
+
 def main():
     while ...:
         for link in fb_search_urls:
