@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+
+  bot:
+    build: .
+    command: sh -c "alembic upgrade head && python bot.py"
+    container_name: fb-bot
+    volumes:
+      - .:/bot
+    environment:
+      - BOT_TOKEN=6249543267:AAEOPQvoj6Zo6-ufviJjZ6yTZ8Z6OPkqoXY
+      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot
+      - DATABASE_ASYNC_URL=postgresql+asyncpg://bot:qwerty@postgres:5432/bot
+      - CELERY_BROKER_URL=redis://redis:6379/0  # сэлери хранит задачи на выполнение (гарантирует выполнение этих задач) задача сэвиться в нулевую, пока задача не выполниться она там находиться.
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      - postgres
+#      - redis
+
+  postgres:
+    image: postgres:15-alpine3.18
+    container_name: postgres-fb-bot
+    environment:
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_USER=bot
+      - POSTGRES_DB=bot
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+#  redis:
+#    image: redis:7.0.11-alpine3.18
+#    container_name: redis-bot
+#
+#  celery-worker:
+#    build: .
+#    command: celery -A src.settings:celery worker -l INFO
+#    container_name: celery-worker
+#    volumes:
+#      - .:/bot
+#    environment:
+#      - BOT_TOKEN=6249543267:AAEOPQvoj6Zo6-ufviJjZ6yTZ8Z6OPkqoXY
+#      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot
+#      - DATABASE_ASYNC_URL=postgresql+asyncpg://bot:qwerty@postgres:5432/bot
+#      - CELERY_BROKER_URL=redis://redis:6379/0  # сэлери хранит задачи на выполнение (гарантирует выполнение этих задач) задача сэвиться в нулевую, пока задача не выполниться она там находиться.
+#      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+#    depends_on:
+#      - postgres
+#      - redis
+#      - celery-beat
+#
+#  celery-beat:
+#    build: .
+#    command: celery -A src.settings:celery beat -l INFO
+#    container_name: celery-beat
+#    volumes:
+#      - .:/bot
+#    environment:
+#      - BOT_TOKEN=6249543267:AAEOPQvoj6Zo6-ufviJjZ6yTZ8Z6OPkqoXY
+#      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot
+#      - DATABASE_ASYNC_URL=postgresql+asyncpg://bot:qwerty@postgres:5432/bot
+#      - CELERY_BROKER_URL=redis://redis:6379/0  # сэлери хранит задачи на выполнение (гарантирует выполнение этих задач) задача сэвиться в нулевую, пока задача не выполниться она там находиться.
+#      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+#    depends_on:
+#      - postgres
+#      - redis
