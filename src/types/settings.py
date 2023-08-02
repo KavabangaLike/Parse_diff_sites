@@ -1,6 +1,6 @@
 from pydantic import SecretStr, PostgresDsn, RedisDsn
 
-DATABASE_URL = 'postgresql://bot:qwerty@postgres:5432/bot'
+DATABASE_URL = 'postgresql://bot:qwerty@0.0.0.0:5432/bot'
 
 
 class Settings:
