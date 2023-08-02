@@ -1,5 +1,5 @@
 import random
-
+from datetime import datetime
 from src.utils.fb import get_product_info, get_response, get_urls, if_url_active
 from database import DataBase, pg_insert_product, pg_select_product_links
 from time import sleep
@@ -23,7 +23,7 @@ def start_parse(fb_search_url: str) -> None:
     for url in urls_from_search:
         if url.split('/')[5] not in urls_id_db:
             urls_to_parse.append(url)
-    print(f'Найдено объявлений: {len(urls_from_search)} Найдено новых объявлений: {len(urls_to_parse)}')
+    print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}Total: {len(urls_from_search)} New: {len(urls_to_parse)}')
     if urls_to_parse:
         for url in urls_to_parse:
             data = get_product_info(get_response(url))
@@ -57,7 +57,7 @@ def main():
             start_parse(link)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 

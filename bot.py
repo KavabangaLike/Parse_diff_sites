@@ -1,8 +1,6 @@
 import logging
 from src.settings import dp, bot
-from threading import Thread
 import asyncio
-import app
 from src.handlers import handlers
 
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 # @dp.message_handler(commands='start')
-# async def start_command(message: types.Message):
+# async def start_command(message: types.Message):z
 #     # with open('links.txt', 'r', encoding='utf-8') as file_r:
 #     # links = file_r.read().split('\n')
 #     # for link in links: n
@@ -44,11 +42,4 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
-    # asyncio.run(main())
-    threads = [Thread(target=asyncio.run(main())), Thread(target=app.main())]
-    for thread in threads:
-        print(1)
-        thread.start()
-    print(2)
-    for thread in threads:
-        thread.join()
+    asyncio.run(main())
