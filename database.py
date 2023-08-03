@@ -1,6 +1,9 @@
 import sqlite3
 from src.models import Products, Users
 from sqlalchemy import select
+from src.utils.google_sheet import gh_prepare_data, gh_insert
+
+
 
 class DataBase:
     connection = sqlite3.connect('db.sqlite3')
@@ -53,6 +56,22 @@ def pg_select_product_links():
         return [i[0] for i in [*result]]
 
 
+def pg_select_products(low: int, high: int):
+    with Products.session() as session:
+        query = select(Products.id,
+                       Products.product_id,
+                       Products.product_link,
+                       Products.price,
+                       Products.product_prop,
+                       Products.description,
+                       Products.profile_url,
+                       Products.is_active,
+                       Products.current,
+                       Products.pictures).where(Products.id < high).where(Products.id >= low)
+        result = session.execute(query)
+        return [[*i] for i in result], low, high
+
+
 def pg_insert_new_user(user_id: str, role='user'):
     with Users.session() as session:
         user = Users(
@@ -69,3 +88,6 @@ def pg_select_all_users_id():
         query = select(Users.user_id)
         users_id = session.execute(query)
         return [i[0] for i in users_id]
+
+
+gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))

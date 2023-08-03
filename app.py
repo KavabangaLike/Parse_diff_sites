@@ -9,7 +9,12 @@ from uses import urls_for_parser
 
 
 def start_parse(fb_search_url: str, cookie: str, geo: str = None, query: str = None) -> None:
-    urls_from_search = get_urls(get_response(fb_search_url, cookie=cookie))
+    response = get_response(fb_search_url, cookie=cookie)
+    if not response:
+        print(f'Connection Error for {geo, query}')
+        sleep(random.randint(400, 500))
+        return None
+    urls_from_search = get_urls(response)
     urls_id_db = pg_select_product_links()
     urls_to_parse = []
     # print(urls_from_search)
