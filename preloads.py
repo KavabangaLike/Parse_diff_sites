@@ -1,4 +1,4 @@
-from src.models import SearchingLinks
+from src.models import SearchingLinks, FbUsers
 
 urls_for_parser = [
     ('Ubud', 'Rent house ubud',
@@ -21,9 +21,27 @@ urls_for_parser = [
      )
 ]
 
+
+users = [
+    ('xacraugihexou-5110@yopmail.com', 'kdsxe8t4'),
+    ('sefasaukello-6489@yopmail.com', 'kdsxe8t4'),
+    ('bofrocresuha-6968@yopmail.com', 'kdsxe8t4'),
+    ('gejoppaurufri-3677@yopmail.com', 'kdsxe8t4'),
+    ('toifocauvauzu-2252@yopmail.com', 'kdsxe8t4'),
+]
+
+
 for l in urls_for_parser:
     with SearchingLinks.session() as session:
         link = SearchingLinks(link=l[2], geo=l[0], query=l[1])
         session.add(link)
         session.commit()
         session.refresh(link)
+
+for u in users:
+    with FbUsers.session() as session:
+        user = FbUsers(login=u[0],
+                       password=u[1])
+        session.add(user)
+        session.commit()
+        session.refresh(user)

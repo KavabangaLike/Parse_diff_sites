@@ -139,7 +139,7 @@ def login(login, password):
                 with open('cookies.txt', 'a') as file:
                     file.write(f'{cookie}\n')
             else:
-                raise ImportError
+                raise ImportError  # отследить, что норм куки не пришли
                 # sys.exit("\033[38;5;208mIncorrect details\033[0m")
             return cookie
     except requests.exceptions.ConnectionError:sys.exit('No internet')

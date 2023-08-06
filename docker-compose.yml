@@ -4,8 +4,8 @@ services:
 
   bot:
     build: .
-    command: sh -c "alembic upgrade head && python fb_users.py & python search_links.py && python bot.py & python app.py"
-    container_name: tg-fb-bot
+    command: sh -c "alembic upgrade head && python preloads.py && python bot.py & python app.py"
+    container_name: fb-bot
     volumes:
       - .:/bot
     environment:
@@ -20,7 +20,7 @@ services:
 
   postgres:
     image: postgres:15-alpine3.18
-    container_name: pg-fb-bot
+    container_name: postgres-fb-bot
     environment:
       - POSTGRES_PASSWORD=qwerty
       - POSTGRES_USER=bot
