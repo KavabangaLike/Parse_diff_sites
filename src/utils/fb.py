@@ -4,19 +4,13 @@ import requests
 from requests import Session
 from bs4 import BeautifulSoup
 # import google_sheet
-
-cook = [
-    # "wd=1696x418; dpr=1.1320754716981132; datr=xKHAZMuWnirV4_oELBK16644; fr=0gXr1AXvBA3q8xAvG.AWUfXJMtkOHfcgsDwKpKAj87_5E.BkyPNZ.ph.AAA.0.0.BkyPNZ.AWVcuq7G3xU; sb=7KHAZNrUuGwzJZTgwt3hcTFV; locale=ru_RU; c_user=100095339734259; xs=26%3AuLcSlqwfkazF0A%3A2%3A1690883593%3A-1%3A-1%3A%3AAcVDW2AvCWBL4EHzxVzJLxc9ey3Jqh4B66ADN1yzUQ; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1690894265223%2C%22v%22%3A1%7D",  # CHANGE datr
-    # "wd=1696x418; dpr=1.1320754716981132; datr=xKHAZMuWnirV4_oELBK1Irg5; fr=0aP5P7Ca0Gy4URFj7.AWXKHf9zk-e08ynMG_v0EMiGja8.BkyNLe.ph.AAA.0.0.BkyNYJ.AWUl5owruPM; sb=7KHAZNrUuGwzJZTgwt3hcTFV; locale=ru_RU; c_user=100095339734259; xs=26%3AuLcSlqwfkazF0A%3A2%3A1690883593%3A-1%3A-1; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1690886632684%2C%22v%22%3A1%7D",  # CHANGE datr
-    # "wd=1200x940; dpr=1.5; datr=2234314W334V3234453452; fr=324532532452345zk-e08ynMG_v0EMiGja8.BkyNLe.ph.AAA.0.0.BkyNYJ.AWUl5owruPM; sb=7KHAZNrUuGwzJZTgwt3hcTFV; locale=ru_RU; c_user=100095339734259; xs=26%3AuLcSlqwfkazF0A%3A2%3A1690883593%3A-1%3A-1;",
-    "dpr=1.25; datr=c3fHZAUGJZDFg_ip2Flh6699; wd=920x1080",  # CHANGE datr
-]
+import os,sys,time,random,requests
+from bs4 import BeautifulSoup as bs
+from datetime import datetime, timedelta
 
 
-def get_response(url: str, cookie: str = cook[0]) -> requests.Response:
-    proxies = {
-        'http': 'http://27.254.217.116:8081'
-    }
+def get_response(url: str, auth_params: tuple[str]) -> requests.Response:
+    cookie = login(auth_params[0], auth_params[1])
     try:
         response = Session().get(url=url, headers={
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -62,7 +56,7 @@ def get_product_info(response: requests.Response) -> list[str] | None:
         description = text.split('"redacted_description":{"text":"')[1].split('"}')[0]
     except IndexError:
         pass
-    current_datetime = datetime.now().strftime("%d.%m %H:%M")
+    current_datetime = (datetime.now() + timedelta(hours=8)).strftime("%d.%m %H:%M")
     try:
         pdp_fields = text.split('"pdp_fields":[')[1].split(']')[0].split('{"display_label":"')
     except IndexError:
@@ -104,4 +98,49 @@ def if_url_active(response):
     if 'redacted_description' not in text:
         return False
 
+def login(login, password):
+    ua = "Mozilla/5.0 (Linux; Android 4.1.2; GT-I8552 Build/JZO54K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36"
 
+    url = 'https://n.facebook.com'
+    xurl = url + '/login.php'
+    try:
+        user=login
+        pswd=password
+        req=requests.Session()
+        req.headers.update({
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'accept-language': 'en_US','cache-control': 'max-age=0',
+        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+        'sec-ch-ua-mobile': '?0','sec-ch-ua-platform': "Windows",
+        'sec-fetch-dest': 'document','sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'same-origin','sec-fetch-user': '?1','upgrade-insecure-requests': '1',
+        'user-agent': ua
+        })
+        with req.get(url) as response_body:
+            inspect=bs(response_body.text,'html.parser')
+            lsd_key=inspect.find('input',{'name':'lsd'})['value']
+            jazoest_key=inspect.find('input',{'name':'jazoest'})['value']
+            m_ts_key=inspect.find('input',{'name':'m_ts'})['value']
+            li_key=inspect.find('input',{'name':'li'})['value']
+            try_number_key=inspect.find('input',{'name':'try_number'})['value']
+            unrecognized_tries_key=inspect.find('input',{'name':'unrecognized_tries'})['value']
+            bi_xrwh_key=inspect.find('input',{'name':'bi_xrwh'})['value']
+            data={
+            'lsd':lsd_key,'jazoest':jazoest_key,
+            'm_ts':m_ts_key,'li':li_key,
+            'try_number':try_number_key,
+            'unrecognized_tries':unrecognized_tries_key,
+            'bi_xrwh':bi_xrwh_key,'email':user,
+            'pass':pswd,'login':"submit"}
+            response_body2=req.post(xurl,data=data,allow_redirects=True,timeout=300)
+            cookie=str(req.cookies.get_dict())[1:-1].replace("'","").replace(",",";").replace(":","=")
+            if 'checkpoint' in cookie:sys.exit("\033[1;31mAccount terminated by Facebook!\033[0m")
+            elif 'c_user' in cookie:
+                with open('cookies.txt', 'a') as file:
+                    file.write(f'{cookie}\n')
+            else:
+                raise ImportError
+                # sys.exit("\033[38;5;208mIncorrect details\033[0m")
+            return cookie
+    except requests.exceptions.ConnectionError:sys.exit('No internet')
+    except KeyboardInterrupt:sys.exit("[+] Stopped!")

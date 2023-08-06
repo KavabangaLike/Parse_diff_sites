@@ -22,3 +22,15 @@ class Users(Base):
     user_id = Column(VARCHAR(128))
     group = Column(VARCHAR(64))
 
+
+class FbUsers(Base):
+    __tablename__ = 'fb_users'
+    login = Column(VARCHAR(128))
+    password = Column(VARCHAR(128))
+
+
+class SearchingLinks(Base):
+    __tablename__ = 'searching_links'
+    link = Column(VARCHAR(512))
+    geo = Column(VARCHAR(256))
+    query = Column(VARCHAR(256))

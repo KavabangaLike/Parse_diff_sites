@@ -1,6 +1,7 @@
+import aiogram.exceptions
 from aiogram.types.input_media_photo import InputMediaPhoto
 from src.settings import bot, dp
-from database import DataBase, pg_insert_new_user, pg_select_all_users_id
+from database import pg_insert_new_user, pg_select_all_users_id
 from src.keyboards.inline.ik import InlineKeyboards
 from aiogram.types import Message
 from aiogram.filters.command import Command
@@ -19,12 +20,15 @@ async def send_all(data: list[str]) -> None:
     #     descr = data[4].replace('\\/', ' ').replace('\\n', ' ')
     for id in users_id:
         try:
-            await bot.send_media_group(chat_id=id, media=input_media_photos)
-        except:
-            await bot.send_message(chat_id=id, text='Фото не получены. Возможно, на сайте видеоматериалы 🎞️')
-        mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])}</b>\nОписание: {descr[:250] + " ..." if len(descr) > 250 else descr}\n<i>актуально на {data[7]}</i>'
-        await bot.send_message(chat_id=id, text=mes, reply_markup=InlineKeyboards(data[0], data[5]).product_more_buttons(),
+            try:
+                await bot.send_media_group(chat_id=id, media=input_media_photos)
+            except:
+                await bot.send_message(chat_id=id, text='Фото не получены. Возможно, на сайте видеоматериалы')
+            mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])}</b>\nОписание: {descr[:250] + " ..." if len(descr) > 250 else descr}\n<i>актуально на {data[7]}</i>'
+            await bot.send_message(chat_id=id, text=mes, reply_markup=InlineKeyboards(data[0], data[5]).product_more_buttons(),
                              disable_web_page_preview=True, parse_mode='HTML')
+        except aiogram.exceptions.TelegramForbiddenError:
+            print(f'*** TelegramForbiddenError. USER:{id} ***')
 
 
 @dp.message(Command('start'))

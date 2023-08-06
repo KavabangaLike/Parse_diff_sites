@@ -1,8 +1,7 @@
 import sqlite3
-from src.models import Products, Users
+from src.models import Products, Users, FbUsers, SearchingLinks
 from sqlalchemy import select
 from src.utils.google_sheet import gh_prepare_data, gh_insert
-
 
 
 class DataBase:
@@ -25,10 +24,6 @@ class DataBase:
         sql_add = 'INSERT INTO users(id) VALUES (?)'
         cls.cursor.execute(sql_add, (user_id, ))
         cls.connection.commit()
-
-    # @classmethod
-    # def insert_disable(cls):
-    #     sql= 'INSERT INTO products(id) VALUES (?) WHERE product_link'
 
 
 def pg_insert_product(data):
@@ -56,10 +51,10 @@ def pg_select_product_links():
         return [i[0] for i in [*result]]
 
 
-def pg_select_products(low: int, high: int):
+def pg_select_products(limit: int, offset: int):
     with Products.session() as session:
-        query = select(Products.id,
-                       Products.product_id,
+        query = select(Products.product_id,
+                       Products.title,
                        Products.product_link,
                        Products.price,
                        Products.product_prop,
@@ -67,9 +62,9 @@ def pg_select_products(low: int, high: int):
                        Products.profile_url,
                        Products.is_active,
                        Products.current,
-                       Products.pictures).where(Products.id < high).where(Products.id >= low)
+                       Products.pictures).limit(limit).offset(offset)
         result = session.execute(query)
-        return [[*i] for i in result], low, high
+        return [[*i] for i in result]
 
 
 def pg_insert_new_user(user_id: str, role='user'):
@@ -90,4 +85,20 @@ def pg_select_all_users_id():
         return [i[0] for i in users_id]
 
 
-gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))
+def pg_select_fb_users():
+    with FbUsers.session() as session:
+        query = select(FbUsers.login,
+                       FbUsers.password)
+        users = session.execute(query)
+        return [*users]
+
+
+def pg_select_links():
+    with SearchingLinks.session() as session:
+        query = select(SearchingLinks.link,
+                       SearchingLinks.geo,
+                       SearchingLinks.query)
+        links = session.execute(query)
+        return [*links]
+
+# gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))

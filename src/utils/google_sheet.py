@@ -17,21 +17,22 @@ service = googleapiclient.discovery.build('sheets', 'v4', http=httpAuth)  # Вы
 #     'properties': {'title': 'Parse_facebook', 'locale': 'ru_RU'},
 #     'sheets': [{'properties': {'sheetType': 'GRID',
 #                                'sheetId': 0,
-#                                'title': 'Sheet1',
+#                                'title': 'SheetA',
 #                                'gridProperties': {'rowCount': 100, 'columnCount': 15}}}]
 # }).execute()
 # spreadsheetId = spreadsheet['spreadsheetId'] # сохраняем идентификатор файла
-def gh_prepare_data(data, low, high):
+# print('https://docs.google.com/spreadsheets/d/' + spreadsheetId)
+def gh_prepare_data(data):
     for row in data:
         images = row[9].split(',')
-        for image in images[1:]:
-            row.append(f'=IMAGE("{image}"; 3)')
+        for image in images[1:10]:
+            row.append(f'=IMAGE("{image}"; 2)')
         row[9] = images[0]
-    return data, low, high
+    return data
 
 
 def gh_insert(data, low: int, high: int) -> None:
-    spreadsheetId = '164e27z144yhgVLlG38VmVDM3mywuruo_V7CWnwh1ANw'  # сохраняем идентификатор файла
+    spreadsheetId = '1RZLzmqbS9PwP6iUbEfvzOIWRlKGJ2fkI5F2QIukGuv0'  # сохраняем идентификатор файла
 
     driveService = googleapiclient.discovery.build('drive', 'v3',
                                              http=httpAuth)  # Выбираем работу с Google Drive и 3 версию API
@@ -46,7 +47,7 @@ def gh_insert(data, low: int, high: int) -> None:
         "valueInputOption": "USER_ENTERED",
         # Данные воспринимаются, как вводимые пользователем (считается значение формул)
         "data": [
-            {"range": f"Sheet1!A{low}:AZ{high}",
+            {"range": f"Sheet!A{low}:X{high}",
              "majorDimension": "ROWS",  # Сначала заполнять строки, затем столбцы
              "values": data
              }
@@ -78,3 +79,4 @@ def get_product(from_, to_):
     print(sheet_values)
     return sheet_values
 
+# gh_insert([['ergf', 'ergfs', 'srdfgsrgdsrtdhsretghsergf']], 1, 5)
