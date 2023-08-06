@@ -4,7 +4,7 @@ services:
 
   bot:
     build: .
-    command: sh -c "alembic upgrade head && python preloaded/fb_users.py & python preloaded/search_links.py && python bot.py & python app.py"
+    command: sh -c "alembic upgrade head && python fb_users.py & python search_links.py && python bot.py & python app.py"
     container_name: tg-fb-bot
     volumes:
       - .:/bot
