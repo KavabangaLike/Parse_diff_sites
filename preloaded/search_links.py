@@ -1,4 +1,4 @@
-from src.models import SearchingLinks
+from ..src.models import SearchingLinks
 
 urls_for_parser = [
     ('Ubud', 'Rent house ubud',

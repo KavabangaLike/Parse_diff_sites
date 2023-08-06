@@ -1,4 +1,4 @@
-from src.models import FbUsers
+from ..src.models import FbUsers
 
 users = [
     ('xacraugihexou-5110@yopmail.com', 'kdsxe8t4'),
