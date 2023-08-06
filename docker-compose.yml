@@ -20,7 +20,7 @@ services:
 
   postgres:
     image: postgres:15-alpine3.18
-    container_name: postgres-fb-bot
+    container_name: pg-fb-bot
     environment:
       - POSTGRES_PASSWORD=qwerty
       - POSTGRES_USER=bot
