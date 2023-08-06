@@ -10,6 +10,6 @@ class InlineKeyboards:
 
     def product_more_buttons(self) -> InlineKeyboardMarkup:
         ikb1 = InlineKeyboardButton(text='Подробнее', url=self.url1)
-        ikb2 = InlineKeyboardButton(text='Продавец', url=self.url2)
-        return InlineKeyboardMarkup(inline_keyboard=[[ikb2, ikb1]])
+        # ikb2 = InlineKeyboardButton(text='Продавец', url=self.url2)
+        return InlineKeyboardMarkup(inline_keyboard=[[ikb1]])
 
