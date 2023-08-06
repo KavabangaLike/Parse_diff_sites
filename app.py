@@ -51,13 +51,12 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
 
 
 def parsing():
-    urls_for_parser = pg_select_links()
+    urls_for_parser = pg_select_links()[1:]
     fb_users, i = pg_select_fb_users(), 0
-    print(fb_users)
-    print(urls_for_parser)
     while ...:
         for link in urls_for_parser:
             while ...:
+                print(f'<<< Alter user to {fb_users[i][0]} >>>')
                 result = start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_users[i])
                 if result == 0:
                     break
@@ -69,7 +68,7 @@ def parsing():
 
 def gh_clone_db():
     while ...:
-        limit, offset = 150, 0
+        limit, offset = 175, 0
         while ...:
             data = pg_select_products(limit, offset)
             if not data:
@@ -86,7 +85,7 @@ def gh_clone_db():
 
 
 if __name__ == "__main__":
-    processes = [gh_clone_db]
+    processes = [parsing, gh_clone_db]
     for process in processes:
         multiprocessing.Process(target=process).start()
 
