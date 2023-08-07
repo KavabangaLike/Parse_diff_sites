@@ -29,6 +29,8 @@ async def send_all(data: list[str]) -> None:
                              disable_web_page_preview=True, parse_mode='HTML')
         except aiogram.exceptions.TelegramForbiddenError:
             print(f'\033[1;31m*** TelegramForbiddenError. USER:{id} ***\033[0m')
+        except aiogram.exceptions.TelegramBadRequest:
+            print(f'\033[1;31m*** TelegramBadRequest. USER:{id} ***\033[0m')
 
 
 @dp.message(Command('start'))

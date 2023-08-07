@@ -23,11 +23,15 @@ urls_for_parser = [
 
 
 users = [
-    ('xacraugihexou-5110@yopmail.com', 'kdsxe8t4'),
-    ('sefasaukello-6489@yopmail.com', 'kdsxe8t4'),
-    ('bofrocresuha-6968@yopmail.com', 'kdsxe8t4'),
-    ('gejoppaurufri-3677@yopmail.com', 'kdsxe8t4'),
-    ('toifocauvauzu-2252@yopmail.com', 'kdsxe8t4'),
+    ('geifadetteuwoi-2186@yopmail.com', 'kdsxe8t5'),
+    ('seiyoupeiviwoi-8695@yopmail.com', 'kdsxe8t5'),
+    ('kugreufraweti-9375@yopmail.com', 'kdsxe8t5'),
+    ('taffousseheze-7383@yopmail.com', 'kdsxe8t5'),
+    ('hugiveyada-5236@yopmail.com', 'kdsxe8t5'),
+    ('coihollocewe-6078@yopmail.com', 'kdsxe8t5'),
+    ('xeixotteiquissau-7998@yopmail.com', 'kdsxe8t5'),
+    ('vouyulilloicu-2430@yopmail.com', 'kdsxe8t5'),
+    ('loijedebaubrei-8212@yopmail.com', 'kdsxe8t5'),
 ]
 
 

@@ -8,6 +8,7 @@ from src.handlers import handlers
 import asyncio
 # from uses import urls_for_parser
 from src.utils.google_sheet import gh_insert, gh_prepare_data
+from random import shuffle
 
 
 def start_parse(fb_search_url: str, auth_params: tuple[str],
@@ -19,6 +20,10 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
         sleep(random.uniform(25.0, 45.0))
         return 1
     urls_from_search = get_urls(response)
+    if not len(urls_from_search):
+        print(f'\033[1;31m***Parse no links with {auth_params[0]}, {geo, query}***\033[0m')
+        sleep(random.uniform(25.0, 45.0))
+        return 1
     urls_id_db = pg_select_product_links()
     urls_to_parse = []
     # print(urls_from_search)
@@ -53,17 +58,19 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
 def parsing():
     urls_for_parser = pg_select_links()
     fb_users, i = pg_select_fb_users(), 0
+    shuffle(fb_users)
     while ...:
-        for link in urls_for_parser:
-            while ...:
-                print(f'<<< Current user is {fb_users[i][0]} >>>')
-                result = start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_users[i])
-                if result == 0:
-                    break
-                elif result == 1:
-                    i += 1
-                if i >= len(fb_users):
-                    i = 0
+        for fb_user in fb_users:
+            for link in urls_for_parser:
+                while ...:
+                    print(f'<<< Current user is {fb_user[0]} >>>')
+                    result = start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_user)
+                    if result == 0:
+                        break
+                    elif result == 1:
+                        i += 1
+                    if i >= len(fb_users):
+                        i = 0
 
 
 def gh_clone_db():
