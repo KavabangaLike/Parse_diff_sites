@@ -57,10 +57,11 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
 
 def parsing():
     urls_for_parser = pg_select_links()
-    fb_users, i = pg_select_fb_users(), 0
+    fb_users = pg_select_fb_users()
     shuffle(fb_users)
     while ...:
         for fb_user in fb_users:
+            i = 0
             for link in urls_for_parser:
                 while ...:
                     print(f'<<< Current user is {fb_user[0]} >>>')
@@ -68,9 +69,10 @@ def parsing():
                     if result == 0:
                         break
                     elif result == 1:
-                        i += 1
-                    if i >= len(fb_users):
-                        i = 0
+                        i = 1
+                        break
+                if i == 1:
+                    break
 
 
 def gh_clone_db():
@@ -84,7 +86,7 @@ def gh_clone_db():
             try:
                 gh_insert(gh_prepare_data(data), offset + 1, offset + limit + 1)
             except Exception as ex:
-                print('\033[1;31mERROR with google sheet: \033[0m', ex)
+                printg('\033[1;31mERROR with google sheet: \033[0m', ex)
                 break
             offset += limit
             sleep(1)
