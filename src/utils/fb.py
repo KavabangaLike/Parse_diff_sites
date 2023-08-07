@@ -10,7 +10,10 @@ from datetime import datetime, timedelta
 
 
 def get_response(url: str, auth_params: tuple[str]) -> requests.Response:
-    cookie = login(auth_params[0], auth_params[1])
+    try:
+        cookie = login(auth_params[0], auth_params[1])
+    except ImportError:
+        raise ImportError
     try:
         response = Session().get(url=url, headers={
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -97,6 +100,7 @@ def if_url_active(response):
     # if 'Это объявление уже неактивно' in text or
     if 'redacted_description' not in text:
         return False
+
 
 def login(login, password):
     ua = "Mozilla/5.0 (Linux; Android 4.1.2; GT-I8552 Build/JZO54K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.125 Mobile Safari/537.36"
