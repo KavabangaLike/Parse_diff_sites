@@ -15,7 +15,7 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
     try:
         response = get_response(fb_search_url, auth_params)
     except ImportError:
-        print('<<<Cant connect with current fb user>>>')
+        print(f'\033[1;31m***Cant connect with user {auth_params[0]}***\033[0m')
         sleep(random.uniform(25.0, 45.0))
         return 1
     urls_from_search = get_urls(response)
@@ -77,7 +77,7 @@ def gh_clone_db():
             try:
                 gh_insert(gh_prepare_data(data), offset + 1, offset + limit + 1)
             except Exception as ex:
-                print('ERROR with google sheet: ', ex)
+                print('\033[1;31mERROR with google sheet: \033[0m', ex)
                 break
             offset += limit
             sleep(1)
@@ -86,7 +86,7 @@ def gh_clone_db():
 
 
 if __name__ == "__main__":
-    processes = [parsing, gh_clone_db]
+    processes = [parsing]
     for process in processes:
         multiprocessing.Process(target=process).start()
 

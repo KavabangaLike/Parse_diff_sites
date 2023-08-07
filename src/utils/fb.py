@@ -117,14 +117,18 @@ def login(login, password):
         'user-agent': ua
         })
         with req.get(url) as response_body:
-            inspect=bs(response_body.text,'html.parser')
-            lsd_key=inspect.find('input',{'name':'lsd'})['value']
-            jazoest_key=inspect.find('input',{'name':'jazoest'})['value']
-            m_ts_key=inspect.find('input',{'name':'m_ts'})['value']
-            li_key=inspect.find('input',{'name':'li'})['value']
-            try_number_key=inspect.find('input',{'name':'try_number'})['value']
-            unrecognized_tries_key=inspect.find('input',{'name':'unrecognized_tries'})['value']
-            bi_xrwh_key=inspect.find('input',{'name':'bi_xrwh'})['value']
+            try:
+                inspect=bs(response_body.text,'html.parser')
+                lsd_key=inspect.find('input',{'name':'lsd'})['value']
+                jazoest_key=inspect.find('input',{'name':'jazoest'})['value']
+                m_ts_key=inspect.find('input',{'name':'m_ts'})['value']
+                li_key=inspect.find('input',{'name':'li'})['value']
+                try_number_key=inspect.find('input',{'name':'try_number'})['value']
+                unrecognized_tries_key=inspect.find('input',{'name':'unrecognized_tries'})['value']
+                bi_xrwh_key=inspect.find('input',{'name':'bi_xrwh'})['value']
+            except TypeError:
+                print(f'\033[1;31m*** type error with user {login} ***\033[0m')
+                raise ImportError  # Пока так. ошибка при m_ts_key None type приходит
             data={
             'lsd':lsd_key,'jazoest':jazoest_key,
             'm_ts':m_ts_key,'li':li_key,

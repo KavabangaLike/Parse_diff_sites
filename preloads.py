@@ -34,14 +34,20 @@ users = [
 for l in urls_for_parser:
     with SearchingLinks.session() as session:
         link = SearchingLinks(link=l[2], geo=l[0], query=l[1])
-        session.add(link)
-        session.commit()
-        session.refresh(link)
+        try:
+            session.add(link)
+            session.commit()
+            session.refresh(link)
+        except:
+            pass
 
 for u in users:
     with FbUsers.session() as session:
         user = FbUsers(login=u[0],
                        password=u[1])
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+        try:
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        except:
+            pass

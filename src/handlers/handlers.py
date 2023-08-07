@@ -28,7 +28,7 @@ async def send_all(data: list[str]) -> None:
             await bot.send_message(chat_id=id, text=mes, reply_markup=InlineKeyboards(data[0], data[5]).product_more_buttons(),
                              disable_web_page_preview=True, parse_mode='HTML')
         except aiogram.exceptions.TelegramForbiddenError:
-            print(f'*** TelegramForbiddenError. USER:{id} ***')
+            print(f'\033[1;31m*** TelegramForbiddenError. USER:{id} ***\033[0m')
 
 
 @dp.message(Command('start'))

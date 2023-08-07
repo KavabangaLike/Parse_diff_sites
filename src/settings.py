@@ -9,7 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SETTINGS = Settings()
 
 bot = Bot(
-    token='6306659052:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU',
+    # token='6306659052:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU',
+    token='6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM',
     parse_mode=ParseMode.HTML
 )
 

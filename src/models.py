@@ -1,5 +1,5 @@
 from sqlalchemy import Column, VARCHAR, BOOLEAN, INT, ForeignKey, TEXT, SMALLINT
-
+from sqlalchemy.orm import relationship
 from src.database import Base
 
 
@@ -21,16 +21,17 @@ class Users(Base):
     __tablename__ = 'users'
     user_id = Column(VARCHAR(128))
     group = Column(VARCHAR(64))
+    searching_links_id = Column(INT, ForeignKey('searching_links.id'))
 
 
 class FbUsers(Base):
     __tablename__ = 'fb_users'
-    login = Column(VARCHAR(128))
+    login = Column(VARCHAR(128), unique=True)
     password = Column(VARCHAR(128))
 
 
 class SearchingLinks(Base):
     __tablename__ = 'searching_links'
-    link = Column(VARCHAR(512))
+    link = Column(VARCHAR(512), unique=True)
     geo = Column(VARCHAR(256))
     query = Column(VARCHAR(256))
