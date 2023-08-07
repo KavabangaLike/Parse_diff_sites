@@ -108,4 +108,3 @@ def login():
 			return cookie
 	except requests.exceptions.ConnectionError:sys.exit('No internet')
 	except KeyboardInterrupt:sys.exit("[+] Stopped!")
-login()

@@ -67,9 +67,9 @@ def parsing():
 
 
 def gh_clone_db():
-    sleep(1500)
+    sleep(3500)
     while ...:
-        limit, offset = 175, 0
+        limit, offset = 200, 0
         while ...:
             data = pg_select_products(limit, offset)
             if not data:
@@ -86,7 +86,7 @@ def gh_clone_db():
 
 
 if __name__ == "__main__":
-    processes = [parsing]
+    processes = [parsing, gh_clone_db]
     for process in processes:
         multiprocessing.Process(target=process).start()
 
