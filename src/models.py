@@ -53,6 +53,8 @@ class Currency(Base):  # Валюта
 class TgUser(Base):   # !!!!!!!!!!!!!!!!!!!!!!!!
     __tablename__ = 'tg_user'
     id = Column(BIGINT, unique=True, nullable=False, primary_key=True)
+    username = Column(VARCHAR(64), nullable=True)
+    access_expire = Column(TIMESTAMP, nullable=True)
     user_group_id = Column(INT, ForeignKey('user_group.id', ondelete='RESTRICT'), nullable=False)
 
 

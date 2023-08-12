@@ -1,6 +1,7 @@
 from src.models import Product, TgUser, FbUser, SearchLink, Land, Currency, ProductFacility, Facility, Picture, \
     UserGroup
-from sqlalchemy import select
+from sqlalchemy import select, or_
+from datetime import datetime
 
 
 # from src.utils.google_sheet import gh_prepare_data, gh_insert
@@ -52,9 +53,9 @@ def pg_select_products(limit: int, offset: int):  ##
         return [*result]
 
 
-def pg_insert_new_user(user_id: str, role='newbies'):  #
+def pg_insert_new_user(user_id: str, access_expire: datetime, username: str, role='newbies'):  #
     with TgUser.session() as session:
-        user = TgUser(id=user_id)
+        user = TgUser(id=user_id, access_expire=access_expire, username=username)
         user.user_group_id = session.scalar(select(UserGroup.id).filter(UserGroup.name == role))
         session.add(user)
         session.commit()
@@ -65,8 +66,11 @@ def pg_select_all_users_id(groups: list[str]) -> list[str]:  #
     users = []
     for group in groups:
         with TgUser.session() as session:
-            query = session.query(TgUser.id).join(UserGroup, UserGroup.name == group)
+            query = session.query(TgUser.id).join(UserGroup)\
+                .filter(UserGroup.name == group)\
+                .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None))
             users.extend(query.all())
+    print(users)
     return [i[0] for i in users]
 
 
@@ -96,6 +100,11 @@ def pg_change_user_group(user_id, group: str):
         session.refresh(user)
 
 
-
-
+def pg_change_user_access_period(user_id, period: datetime | None):
+    with TgUser.session() as session:
+        user = session.get(TgUser, user_id)
+        user.access_expire = period
+        session.add(user)
+        session.commit()
+        session.refresh(user)
 # gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))
