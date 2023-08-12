@@ -62,7 +62,7 @@ def pg_insert_new_user(user_id: str, access_expire: datetime, username: str, rol
         session.refresh(user)
 
 
-def pg_select_all_users_id(groups: list[str]) -> list[str]:  #
+def pg_select_users_id(groups: list[str]) -> list[str]:  #
     users = []
     for group in groups:
         with TgUser.session() as session:

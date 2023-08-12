@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from aiogram.types.input_media_photo import InputMediaPhoto
 from src.settings import bot, dp
-from database import pg_insert_new_user, pg_select_all_users_id, pg_change_user_group, pg_change_user_access_period
+from database import pg_insert_new_user, pg_select_users_id, pg_change_user_group, pg_change_user_access_period
 from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import Command
@@ -14,7 +14,7 @@ from aiogram import F
 async def send_all(data: list[str]) -> None:
     photos = data[6].split(',')[:10]
     input_media_photos = [InputMediaPhoto(media=url) for url in photos]
-    users = pg_select_all_users_id(['users', 'admins', 'superadmins', 'newbies'])
+    users = pg_select_users_id(['users', 'admins', 'superadmins', 'newbies'])
     list_of_prop = [data[2]]
     list_of_prop.extend(data[3].split(','))
     descr = data[4].replace('\\n', ' ').replace('\\/', '/')
@@ -41,21 +41,16 @@ async def start_chat(message: Message) -> None:
         pg_insert_new_user(str(user_id), access_expire=datetime.now() + timedelta(hours=24),
                            username=message.from_user.username)
         await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}!')
-        chats_id = pg_select_all_users_id(['users', 'admins', 'superadmins', 'newbies'])  ##
+        chats_id = pg_select_users_id(['superadmins']) ##
         for chat_id in chats_id:
-            await bot.send_message(chat_id=chat_id, text=f'🥳 К боту присоеденился новый пользователь: '
-                                                         f'@{message.chat.username}',  # и id: {message.chat.id}',
-                                   reply_markup=InlineKeyboards(message.from_user.id, 'newbies').handle_user())
-    except IntegrityError:
-        await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
-        chats_id = pg_select_all_users_id(['users', 'admins', 'superadmins', 'newbies'])
-        for chat_id in chats_id:
-            await bot.send_message(chat_id=chat_id, text=f'🥳 К боту присоеденился новый пользователь '
+            await bot.send_message(chat_id=chat_id, text=f'#new_user '
                                                          f'{message.from_user.first_name}, с ником: '
-                                                         f'@{message.chat.username}',  # и id: {message.chat.id}',
+                                                         f'@{message.chat.username} и id: {message.chat.id}',
                                    reply_markup=InlineKeyboards(param1=message.from_user.id, param2='newbies',
                                                                 param3='day')
                                    .handle_user())
+    except IntegrityError:
+        await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
 
 
 @dp.callback_query(UserCallbackData.filter())
