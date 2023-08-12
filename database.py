@@ -66,9 +66,10 @@ def pg_select_users_id(groups: list[str]) -> list[str]:  #
     users = []
     for group in groups:
         with TgUser.session() as session:
-            query = session.query(TgUser.id).join(UserGroup)\
-                .filter(UserGroup.name == group)\
-                .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None))
+            query = session.query(TgUser.id).join(UserGroup) \
+                .filter(UserGroup.name == group) \
+                .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None)) \
+                .filter(TgUser.show_products == True)
             users.extend(query.all())
     return [i[0] for i in users]
 
@@ -99,11 +100,21 @@ def pg_change_user_group(user_id, group: str):
         session.refresh(user)
 
 
-def pg_change_user_access_period(user_id, period: datetime | None):
+def pg_change_user_access_period(user_id, period: datetime | None) -> None:
     with TgUser.session() as session:
         user = session.get(TgUser, user_id)
         user.access_expire = period
         session.add(user)
         session.commit()
         session.refresh(user)
+
+
+def pg_show_ads(user_id, action: bool) -> None:
+    with TgUser.session() as session:
+        user = session.get(TgUser, user_id)
+        user.show_products = action
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
 # gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))

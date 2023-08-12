@@ -2,6 +2,9 @@ from pydantic import SecretStr, PostgresDsn, RedisDsn
 
 DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'
 
+TOKEN = '6306659052:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU'  # main TOKEN
+# TOKEN = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
+
 
 class Settings:
     BOT_TOKEN: SecretStr
@@ -11,5 +14,17 @@ class Settings:
     CELERY_RESULT_BACKEND: RedisDsn
 
 
-NoLinksException, UserConnectionError, NoDataFromUrl, NoUrlsFromParse = BaseException(), BaseException(), \
-    BaseException(), BaseException()
+class NoLinksException(BaseException):
+    pass
+
+
+class UserConnectionError(BaseException):
+    pass
+
+
+class NoDataFromUrl(BaseException):
+    pass
+
+
+class NoUrlsFromParse(BaseException):
+    pass

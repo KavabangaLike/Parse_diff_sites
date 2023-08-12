@@ -1,14 +1,13 @@
 import aiogram.exceptions
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from aiogram.types.input_media_photo import InputMediaPhoto
 from src.settings import bot, dp
-from database import pg_insert_new_user, pg_select_users_id, pg_change_user_group, pg_change_user_access_period
+from database import pg_insert_new_user, pg_select_users_id, pg_change_user_group, pg_change_user_access_period, pg_show_ads
 from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import Command
 from datetime import datetime, timedelta
-from aiogram import F
+# from aiogram import F
 
 
 async def send_all(data: list[str]) -> None:
@@ -50,6 +49,7 @@ async def start_chat(message: Message) -> None:
                                                                 param3='day')
                                    .handle_user())
     except IntegrityError:
+        pg_show_ads(message.from_user.id, True)
         await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
 
 
@@ -75,3 +75,9 @@ async def user_to_users(callback: CallbackQuery, callback_data: UserCallbackData
         )
     except aiogram.exceptions.TelegramBadRequest:
         pass
+
+
+@dp.message(Command('pause'))
+async def pause_show_ads(message: Message) -> None:
+    pg_show_ads(message.from_user.id, False)
+    await message.answer(text='Новые объявления пока что появляться не будут 😴. Для возобновления введите команду /start')

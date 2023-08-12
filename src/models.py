@@ -8,7 +8,7 @@ class Product(Base):
     product_id = Column(BIGINT, unique=True, nullable=False)
     product_link = Column(VARCHAR(512), unique=True, nullable=False)
     title = Column(VARCHAR(256), nullable=False)
-    land = Column(INT, ForeignKey('land.id', ondelete='RESTRICT'), nullable=False)  # NEW
+    land = Column(INT, ForeignKey('land.id', ondelete='RESTRICT'))  # NEW how to add nullable=False?
     price = Column(FLOAT)
     currency = Column(INT, ForeignKey('currency.id', ondelete='RESTRICT'), nullable=False)
     in_month = Column(BOOLEAN, default=True)
