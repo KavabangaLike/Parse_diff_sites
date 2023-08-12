@@ -1,104 +1,101 @@
-import sqlite3
-from src.models import Products, Users, FbUsers, SearchingLinks
+from src.models import Product, TgUser, FbUser, SearchLink, Land, Currency, ProductFacility, Facility, Picture, \
+    UserGroup
 from sqlalchemy import select
-from src.utils.google_sheet import gh_prepare_data, gh_insert
 
 
-class DataBase:
-    connection = sqlite3.connect('db.sqlite3')
-    cursor = connection.cursor()
-
-    @classmethod
-    def get(cls, item_to_select: str, table: str) -> list[str]:
-        sql = f'SELECT {item_to_select} FROM {table}'
-        return [url[0] for url in [*cls.cursor.execute(sql)]]
-
-    @classmethod
-    def post_product(cls, data: list[str]) -> None:
-        sql_insert = 'INSERT INTO products(id, product_link, title, price, product_prop, description, profile_url, pictures, current) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        cls.cursor.execute(sql_insert, (data[0].split('/')[5], data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],))
-        cls.connection.commit()
-
-    @classmethod
-    def add_user(cls, user_id: str) -> None:
-        sql_add = 'INSERT INTO users(id) VALUES (?)'
-        cls.cursor.execute(sql_add, (user_id, ))
-        cls.connection.commit()
+# from src.utils.google_sheet import gh_prepare_data, gh_insert
 
 
-def pg_insert_product(data):
-    with Products.session() as session:
-        product = Products(
+def pg_insert_product(data):  ##
+    with Product.session() as session:
+        product = Product(
             product_id=data[0].split('/')[5],
             product_link=data[0],
-            title = data[1],
-            price = data[2],
-            product_prop = data[3],
-            description = data[4],
-            profile_url = data[5],
-            pictures=data[6],
-            current = data[7],
+            title=data[1],
+            price=data[2],
+            currency=session.scalar(select(Currency.id).filter(Currency.symbol == 'rp')),  ##
+            in_month=True,  ##
+
+            description=data[4],
+            profile_url=data[5],
+            expose_datetime=data[7],
         )
+
+        pictures = [Picture(link=i) for i in data[6].split(',')]
+        product.pictures = pictures
+        facilities = [Facility(name=i, type=3) for i in data[3]]  ##
+        # product.facilities = facilities
         session.add(product)
         session.commit()
         session.refresh(product)
 
 
-def pg_select_product_links():
-    with Products.session() as session:
-        query = select(Products.product_id)
-        result = session.execute(query)
-        return [i[0] for i in [*result]]
+def pg_select_product_links():  #
+    with Product.session() as session:
+        query = select(Product.product_id)
+        return [*session.scalars(query).all()]
 
 
-def pg_select_products(limit: int, offset: int):
-    with Products.session() as session:
-        query = select(Products.product_id,
-                       Products.title,
-                       Products.product_link,
-                       Products.price,
-                       Products.product_prop,
-                       Products.description,
-                       Products.profile_url,
-                       Products.is_active,
-                       Products.current,
-                       Products.pictures).limit(limit).offset(offset)
-        result = session.execute(query)
-        return [[*i] for i in result]
+def pg_select_products(limit: int, offset: int):  ##
+    with Product.session() as session:
+        query = session.query(Product.product_id,
+                              Product.title,
+                              Product.product_link,
+                              Product.price,
+                              Product.description,
+                              Product.profile_url,
+                              Product.expose_datetime,
+                              Picture.link).join(Picture, Picture.product_id == Product.id).limit(limit).offset(
+            offset)  ##
+
+        result = query.all()
+        return [*result]
 
 
-def pg_insert_new_user(user_id: str, role='user'):
-    with Users.session() as session:
-        user = Users(
-            user_id=user_id,
-            group=role
-        )
+def pg_insert_new_user(user_id: str, role='newbies'):  #
+    with TgUser.session() as session:
+        user = TgUser(id=user_id)
+        user.user_group_id = session.scalar(select(UserGroup.id).filter(UserGroup.name == role))
         session.add(user)
         session.commit()
         session.refresh(user)
 
 
-def pg_select_all_users_id():
-    with Users.session() as session:
-        query = select(Users.user_id)
-        users_id = session.execute(query)
-        return [i[0] for i in users_id]
+def pg_select_all_users_id(groups: list[str]) -> list[str]:  #
+    users = []
+    for group in groups:
+        with TgUser.session() as session:
+            query = session.query(TgUser.id).join(UserGroup, UserGroup.name == group)
+            users.extend(query.all())
+    return [i[0] for i in users]
 
 
-def pg_select_fb_users():
-    with FbUsers.session() as session:
-        query = select(FbUsers.login,
-                       FbUsers.password)
+def pg_select_fb_users():  #
+    with FbUser.session() as session:
+        query = select(FbUser.login,
+                       FbUser.password)
         users = session.execute(query)
         return [*users]
 
 
-def pg_select_links():
-    with SearchingLinks.session() as session:
-        query = select(SearchingLinks.link,
-                       SearchingLinks.geo,
-                       SearchingLinks.query)
-        links = session.execute(query)
+def pg_select_links():  #
+    with SearchLink.session() as session:
+        links = session.query(
+            SearchLink.link,
+            SearchLink.query,
+            Land.name).join(Land, Land.id == SearchLink.land_id, isouter=True).all()
         return [*links]
+
+
+def pg_change_user_group(user_id, group: str):
+    with TgUser.session() as session:
+        user = session.get(TgUser, user_id)
+        user.user_group_id = session.scalar(select(UserGroup.id).filter(UserGroup.name == group))
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+
+
 
 # gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))

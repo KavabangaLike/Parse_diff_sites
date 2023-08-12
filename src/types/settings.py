@@ -9,3 +9,7 @@ class Settings:
     DATABASE_ASYNC_URL: PostgresDsn
     CELERY_BROKER_URL: RedisDsn
     CELERY_RESULT_BACKEND: RedisDsn
+
+
+NoLinksException, UserConnectionError, NoDataFromUrl, NoUrlsFromParse = BaseException(), BaseException(), \
+    BaseException(), BaseException()

@@ -9,36 +9,38 @@ import asyncio
 # from uses import urls_for_parser
 from src.utils.google_sheet import gh_insert, gh_prepare_data
 from random import shuffle
+from src.types.settings import UserConnectionError, NoUrlsFromParse
 
 
 def start_parse(fb_search_url: str, auth_params: tuple[str],
-                geo: str = None, query: str = None) -> int:
+                geo: str = None, query: str = None) -> None:
     try:
-        response = get_response(fb_search_url, auth_params)
-    except ImportError:
+        response, cookie = get_response(fb_search_url, auth_params)
+    except UserConnectionError:
         print(f'\033[1;31m***Cant connect with user {auth_params[0]}***\033[0m')
         sleep(random.uniform(25.0, 45.0))
-        return 1
+        raise UserConnectionError
     urls_from_search = get_urls(response)
-    if not len(urls_from_search):
+    if not urls_from_search:
         print(f'\033[1;31m***Parse no links with {auth_params[0]}, {geo, query}***\033[0m')
         sleep(random.uniform(25.0, 45.0))
-        return 1
-    urls_id_db = pg_select_product_links()
+        raise NoUrlsFromParse
+    urls_in_db = [str(i) for i in pg_select_product_links()]
+    #print(urls_in_db)
     urls_to_parse = []
     # print(urls_from_search)
     for url in urls_from_search:
-        if url.split('/')[5] not in urls_id_db:
+        if url.split('/')[5].strip() not in urls_in_db:
             urls_to_parse.append(url)
+    #print(urls_to_parse)
     print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
           f'{geo} - '
           f'Total: {len(urls_from_search)} New: {len(urls_to_parse)}'
           f' - {query}')
     if urls_to_parse:
         for url in urls_to_parse:
-            data = get_product_info(get_response(url, auth_params=auth_params))
+            data = get_product_info(get_response(url=url, auth_params=auth_params, cookie=cookie)[0], url=url)
             if data:
-                data = [url] + data
                 pg_insert_product(data)
 
                 async def send_data(dat):
@@ -52,7 +54,6 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
             else:
                 print(f'No incoming data !!! from {url}')
     sleep(random.uniform(300, 500))
-    return 0
 
 
 def parsing():
@@ -65,11 +66,15 @@ def parsing():
             for link in urls_for_parser:
                 while ...:
                     print(f'<<< Current user is {fb_user[0]} >>>')
-                    result = start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_user)
-                    if result == 0:
-                        break
-                    elif result == 1:
+                    try:
+                        start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_user)
+                    except NoUrlsFromParse:
                         i = 1
+                        break
+                    except UserConnectionError:
+                        i = 1
+                        break
+                    else:
                         break
                 if i == 1:
                     break
@@ -86,7 +91,7 @@ def gh_clone_db():
             try:
                 gh_insert(gh_prepare_data(data), offset + 1, offset + limit + 1)
             except Exception as ex:
-                printg('\033[1;31mERROR with google sheet: \033[0m', ex)
+                print('\033[1;31mERROR with google sheet: \033[0m', ex)
                 break
             offset += limit
             sleep(1)
@@ -95,7 +100,7 @@ def gh_clone_db():
 
 
 if __name__ == "__main__":
-    processes = [parsing, gh_clone_db]
+    processes = [parsing]
     for process in processes:
         multiprocessing.Process(target=process).start()
 
