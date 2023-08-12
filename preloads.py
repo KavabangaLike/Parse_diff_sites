@@ -34,9 +34,9 @@ fb_users = [
 ]
 
 lands = [
-    ('Убуд', '112356482109204'),
-    ('Чангу', '107286902636860'),
-    ('Санур', 'denpasar'),
+    ('Ubud', '112356482109204'),
+    ('Canggu', '107286902636860'),
+    ('Sanur', 'denpasar'),
 ]
 
 users = [
@@ -156,7 +156,6 @@ def pg_select_products(limit: int, offset: int): ##
         result = query.all()
         return [*result]
 
-print(pg_select_products(1, 0))
 
 #with TgUser.session() as session:
     #users = session.scalars(select(TgUser.user_group_id, TgUser.id)).all()

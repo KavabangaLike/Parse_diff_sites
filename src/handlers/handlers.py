@@ -15,7 +15,7 @@ async def send_all(data: list[str]) -> None:
     photos = data[6].split(',')[:10]
     input_media_photos = [InputMediaPhoto(media=url) for url in photos]
     users = pg_select_users_id(['users', 'admins', 'superadmins', 'newbies'])
-    list_of_prop = [data[2]]
+    list_of_prop = [data[8]]
     list_of_prop.extend(data[3].split(','))
     descr = data[4].replace('\\n', ' ').replace('\\/', '/')
     for id in users:

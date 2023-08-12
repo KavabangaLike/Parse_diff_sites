@@ -39,7 +39,10 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
           f' - {query}')
     if urls_to_parse:
         for url in urls_to_parse:
-            data = get_product_info(get_response(url=url, auth_params=auth_params, cookie=cookie)[0], url=url)
+            try:
+                data = get_product_info(get_response(url=url, auth_params=auth_params, cookie=cookie)[0], url=url)
+            except AttributeError:
+                raise UserConnectionError
             if data:
                 pg_insert_product(data)
 

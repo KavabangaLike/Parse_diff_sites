@@ -75,6 +75,7 @@ def get_product_info(response: requests.Response, url: str) -> list[str] | None:
                 'unicode-escape')
             price = text.split('amount":')[1].split('},')[0].replace('currency":"', ' ').replace(',', '').replace('"',
                                                                                                                   '')
+            full_price = price
             price, currency, in_month = handle_price(price)
         except IndexError:
             pass
@@ -85,7 +86,6 @@ def get_product_info(response: requests.Response, url: str) -> list[str] | None:
         description = text.split('"redacted_description":{"text":"')[1].split('"}')[0]
         description = repr(description).replace('\\/', '').replace('\\\\n', ' ')
         description = sub(r'\\ud\w{3}', '', description)
-        print(description)
     except IndexError:
         pass
     current_datetime = datetime.now()
@@ -124,7 +124,7 @@ def get_product_info(response: requests.Response, url: str) -> list[str] | None:
     # print(pictures)
     # print(url)
 
-    return [url, title, price, ','.join(product_prop), description, profile_url, pictures, current_datetime]
+    return [url, title, price, ','.join(product_prop), description, profile_url, pictures, current_datetime, full_price]
 
 
 def if_url_active(response):

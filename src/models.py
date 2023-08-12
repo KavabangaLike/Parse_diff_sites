@@ -8,7 +8,7 @@ class Product(Base):
     product_id = Column(BIGINT, unique=True, nullable=False)
     product_link = Column(VARCHAR(512), unique=True, nullable=False)
     title = Column(VARCHAR(256), nullable=False)
-
+    land = Column(INT, ForeignKey('land.id', ondelete='RESTRICT'), nullable=False)  # NEW
     price = Column(FLOAT)
     currency = Column(INT, ForeignKey('currency.id', ondelete='RESTRICT'), nullable=False)
     in_month = Column(BOOLEAN, default=True)
@@ -54,7 +54,8 @@ class TgUser(Base):   # !!!!!!!!!!!!!!!!!!!!!!!!
     __tablename__ = 'tg_user'
     id = Column(BIGINT, unique=True, nullable=False, primary_key=True)
     username = Column(VARCHAR(64), nullable=True)
-    access_expire = Column(TIMESTAMP, nullable=True)
+    access_expire = Column(TIMESTAMP, nullable=True)  #заканчиваться доступ к объявлениям
+    show_products = Column(BOOLEAN, default=True)  # показывать объявления (кнопка стоп)
     user_group_id = Column(INT, ForeignKey('user_group.id', ondelete='RESTRICT'), nullable=False)
 
 

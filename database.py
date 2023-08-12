@@ -70,7 +70,6 @@ def pg_select_users_id(groups: list[str]) -> list[str]:  #
                 .filter(UserGroup.name == group)\
                 .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None))
             users.extend(query.all())
-    print(users)
     return [i[0] for i in users]
 
 
