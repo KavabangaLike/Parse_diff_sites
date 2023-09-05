@@ -24,6 +24,7 @@ class Facility(Base):  # Удобства
     __tablename__ = 'facility'
     name = Column(VARCHAR(256), nullable=False, unique=True)
     type = Column(SMALLINT, nullable=False)  # удобство или тип недвижимости или количество комнат
+    user_facility = relationship('UserFacility', backref='Facility')
 
 
 class ProductFacility(Base):  # удобства, которые есть в объявлении
@@ -61,14 +62,14 @@ class TgUser(Base):   # !!!!!!!!!!!!!!!!!!!!!!!!
 
 class UserLand(Base):  # Показ только объявлений на определенной территории
     __tablename__ = 'user_land'
-    user_id = Column(INT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)  # ЕСЛИ УДАЛЕНИЕ, ТО ЧТО БУДЕТ С ПРОГРАММОЙ??
+    user_id = Column(BIGINT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)  # ЕСЛИ УДАЛЕНИЕ, ТО ЧТО БУДЕТ С ПРОГРАММОЙ??
     land_id = Column(INT, ForeignKey('land.id', ondelete='CASCADE'), nullable=False)
 
 
 class UserFacility(Base):  # Показ только объявлений с определенными удобствами
     __tablename__ = 'user_facility'
-    user_id = Column(INT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)  # ЕСЛИ УДАЛЕНИЕ, ТО ЧТО БУДЕТ С ПРОГРАММОЙ??
-    facility_id = Column(INT, ForeignKey('facility.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(BIGINT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)  # ЕСЛИ УДАЛЕНИЕ, ТО ЧТО БУДЕТ С ПРОГРАММОЙ??
+    facility_id = Column(INT, ForeignKey('facility.id', ondelete='CASCADE'), nullable=False)  # дублирующиеся связи в many-to-many
 
 
 class UserGroup(Base):
@@ -88,6 +89,7 @@ class Land(Base):
     name = Column(VARCHAR(128), unique=True, nullable=False)
     link_name = Column(VARCHAR(128), nullable=False, unique=True)
     links = relationship('SearchLink', backref='Land')
+    product = relationship('Product', backref='Land')
 
 
 class SearchLink(Base):  # ссылки для поиска объявлений
@@ -100,5 +102,5 @@ class SearchLink(Base):  # ссылки для поиска объявлений
 class UserLink(Base):       # ?????????????????????????????????????????
     __tablename__ = 'user_link'
 
-    user_id = Column(INT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(BIGINT, ForeignKey('tg_user.id', ondelete='CASCADE'), nullable=False)
     link_id = Column(INT, ForeignKey('search_link.id', ondelete='CASCADE'), nullable=False)

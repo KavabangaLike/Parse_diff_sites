@@ -10,12 +10,13 @@ import asyncio
 from src.utils.google_sheet import gh_insert, gh_prepare_data
 from random import shuffle
 from src.types.settings import UserConnectionError, NoUrlsFromParse
+from apify import apify_request
 
 
 def start_parse(fb_search_url: str, auth_params: tuple[str],
                 geo: str = None, query: str = None) -> None:
     try:
-        response, cookie = get_response(fb_search_url, auth_params)
+        response = apify_request(url=fb_search_url)
     except UserConnectionError:
         print(f'\033[1;31m***Cant connect with user {auth_params[0]}***\033[0m')
         sleep(random.uniform(25.0, 45.0))
@@ -36,14 +37,17 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
     print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
           f'{geo} - '
           f'Total: {len(urls_from_search)} New: {len(urls_to_parse)}'
-          f' - {query}')
+          f' - {query} - '
+          f'User: {auth_params[0]}')
     if urls_to_parse:
         for url in urls_to_parse:
             try:
-                data = get_product_info(get_response(url=url, auth_params=auth_params, cookie=cookie)[0], url=url)
+                data = get_product_info(get_response(url=url, auth_params=auth_params), url=url)  # - cookie
+                # data = get_product_info(get_response(url=url, auth_params=auth_params)[0], url=url)  # - cookie
             except AttributeError:
                 raise UserConnectionError
             if data:
+                data.append(geo)
                 pg_insert_product(data)
 
                 async def send_data(dat):
@@ -60,17 +64,20 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
 
 
 def parsing():
-    urls_for_parser = pg_select_links()
+    # urls_for_parser = pg_select_links()
+    urls_for_parser = ['https://www.facebook.com/marketplace/denpasar/propertyforsale?query=House%20for%20rent&sortBy=best_match',
+                       'https://www.facebook.com/marketplace/denpasar/propertyforsale?query=House%20for%20rent&sortBy=best_match',]
     fb_users = pg_select_fb_users()
     shuffle(fb_users)
     while ...:
         for fb_user in fb_users:
-            i = 0
-            for link in urls_for_parser:
+            i, user_links_count = 0, 0  # индикатор ошибок, счетчик обработанных ссылок
+            for link in urls_for_parser.copy():
+                urls_for_parser.append(urls_for_parser.pop(0))  # первую ссылку в списке добававляет в конец списка
                 while ...:
-                    print(f'<<< Current user is {fb_user[0]} >>>')
+                    # print(f'<<< Current user is {fb_user[0]} >>>')
                     try:
-                        start_parse(fb_search_url=link[0], geo=link[1], query=link[2], auth_params=fb_user)
+                        start_parse(fb_search_url=link, geo=link[2], query=link[1], auth_params=fb_user)
                     except NoUrlsFromParse:
                         i = 1
                         break
@@ -79,7 +86,9 @@ def parsing():
                         break
                     else:
                         break
-                if i == 1:
+                    finally:
+                        user_links_count += 1
+                if i == 1 or user_links_count >= 8:
                     break
 
 

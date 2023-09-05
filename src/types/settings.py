@@ -1,9 +1,10 @@
 from pydantic import SecretStr, PostgresDsn, RedisDsn
 
-DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'
+# DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'  # server db
+DATABASE_URL = 'postgresql://bot:qwerty@127.0.0.1:5432/bot'  # local db
 
-TOKEN = '6306659052:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU'  # main TOKEN
-# TOKEN = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
+# TOKEN = '6306652:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU'  # main TOKEN
+TOKEN = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
 
 
 class Settings:

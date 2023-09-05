@@ -1,5 +1,5 @@
 from src.models import Product, TgUser, FbUser, SearchLink, Land, Currency, ProductFacility, Facility, Picture, \
-    UserGroup
+    UserGroup, UserFacility
 from sqlalchemy import select, or_
 from datetime import datetime
 
@@ -16,7 +16,7 @@ def pg_insert_product(data):  ##
             price=data[2],
             currency=session.scalar(select(Currency.id).filter(Currency.symbol == 'rp')),  ##
             in_month=True,  ##
-
+            land=session.scalar(select(Land.id).filter(Land.name == data[-1])),
             description=data[4],
             profile_url=data[5],
             expose_datetime=data[7],
@@ -39,23 +39,21 @@ def pg_select_product_links():  #
 
 def pg_select_products(limit: int, offset: int):  ##
     with Product.session() as session:
-        query = session.query(Product.product_id,
-                              Product.title,
-                              Product.product_link,
-                              Product.price,
-                              Product.description,
-                              Product.profile_url,
-                              Product.expose_datetime,
-                              Picture.link).join(Picture, Picture.product_id == Product.id).limit(limit).offset(
-            offset)  ##
+        query = session.scalars(
+            select(Product)
+            .limit(limit)
+            .offset(offset)
+        )
 
         result = query.all()
+        for pic in result[0].pictures:
+            print(pic.product_id, pic.link)
         return [*result]
 
 
 def pg_insert_new_user(user_id: str, access_expire: datetime, username: str, role='newbies'):  #
     with TgUser.session() as session:
-        user = TgUser(id=user_id, access_expire=access_expire, username=username)
+        user = TgUser(id=user_id, access_expire=access_expire, username=username, show_products=True)
         user.user_group_id = session.scalar(select(UserGroup.id).filter(UserGroup.name == role))
         session.add(user)
         session.commit()
@@ -117,4 +115,41 @@ def pg_show_ads(user_id, action: bool) -> None:
         session.commit()
         session.refresh(user)
 
+
+def pg_select_facility(type_: int):
+    with Facility.session() as session:
+        facility = session.scalars(select(Facility.name).filter(Facility.type == type_))
+        return [*facility.all()]
+
+
+def pg_select_related_facility(user_id, type_: int):
+    with UserFacility.session() as session:
+        query = session.query(Facility.name).select_from(UserFacility).join(Facility).filter(Facility.type == type_)\
+            .filter(UserFacility.user_id == user_id)
+        return [i[0] for i in query.all()]
+
+
+def pg_insert_related_facility(user_id, facility_names: list[str]):
+    with UserFacility.session() as session:
+        for facility in facility_names:
+            facility_ = UserFacility(user_id=user_id)
+            facility_.facility_id = session.scalar(select(Facility.id).filter(Facility.name == facility))
+            session.add(facility_)
+            session.commit()
+            session.refresh(facility_)
+
+
+def pg_delete_related_facility(user_id, facility_name: str):  # WARNING
+    with UserFacility.session() as session:
+        f_id = session.query(Facility.id).filter(Facility.name == facility_name)
+        session.query(UserFacility).filter(UserFacility.facility_id.in_(f_id.subquery())).filter(UserFacility.user_id == user_id).delete(synchronize_session=False)
+        session.commit()
+
 # gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))
+# pg_insert_related_facility('643668236', ['месяц', 'год', 'бассейн', 'стиральная машина'])
+# print(pg_select_related_facility('643668236', 3))
+# print(pg_select_facility(1))
+
+# pg_delete_related_facility('643668236', 'бассейн')
+# print(pg_select_links())
+#pg_select_products(10, 0)

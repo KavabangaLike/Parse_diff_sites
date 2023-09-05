@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 async def on_startup():
     await bot.set_my_commands(
         commands=[
+            BotCommand(command='/tune', description='🎛  Configure the Ad filter'),
             BotCommand(command='/pause', description='⏸  Suspend the search for new ads'),
             BotCommand(command='/start', description='▶️  Start searching for housing in Bali!'),
         ],
@@ -18,6 +19,7 @@ async def on_startup():
     )
     await bot.set_my_commands(
         commands=[
+            BotCommand(command='/tune', description='🎛  Настроить фильтр объявлений'),
             BotCommand(command='/pause', description='⏸  Приостановить поиск новых объявлений'),
             BotCommand(command='/start', description='▶️  Начать поиск жилья на Бали!'),
         ],

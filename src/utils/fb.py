@@ -11,7 +11,8 @@ from re import sub
 # sys.stdout.reconfigure(encoding='unicode_escape')
 
 
-def get_response(url: str, auth_params: tuple[str], cookie: str = None) -> tuple[requests.Response, str]:
+def get_response(url: str, auth_params: tuple[str], cookie: str = None, proxies=None):
+    proxies = {'https': 'http://yfonarev2020:66ccakAzi7@185.33.85.249:51523'}
     try:
         if not cookie:
             cookie = login(auth_params[0], auth_params[1])
@@ -20,19 +21,20 @@ def get_response(url: str, auth_params: tuple[str], cookie: str = None) -> tuple
     try:
         response = Session().get(url=url, headers={
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-            "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+            "Accept-Language": 'en_US', 'cache-control': 'max-age=0',  # "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
             "Cookie": cookie,  # CHANGE datr
 
-        })
+        }, proxies=proxies)
     except:
         response = None
     finally:
-        return response, cookie
+        return response.text
 
 
-def get_urls(response: requests.Response) -> list[str]:
-    soup = BeautifulSoup(response.text, features='lxml')
-    return ['https://www.facebook.com' + a['href'] for a in soup.find_all('a') if '/marketplace/item' in a['href']]
+def get_urls(response: str) -> list[str]:
+    soup = BeautifulSoup(response, features='lxml')
+    # print(response)
+    return ['https://www.facebook.com' + a['href'] for a in soup.find_all('a') if 'marketplace/item/' in a['href']]
 
 
 def handle_price(price_: str):
@@ -52,7 +54,7 @@ def handle_price(price_: str):
     return price_, currency, in_month
 
 
-def get_product_info(response: requests.Response, url: str) -> list[str] | None:
+def get_product_info(response: requests.Response | str, url: str) -> list[str] | None:
     text = response.text
     if 'marketplace_listing_title' not in text:
         return None
@@ -68,6 +70,8 @@ def get_product_info(response: requests.Response, url: str) -> list[str] | None:
         price = spans[3].text
 
         price, currency, in_month = handle_price(price)
+        full_price = (str(int(price)) + ' ' + currency).replace('000000000', ' billion ').replace('000000', ' mln ')\
+            .replace('000', ' thousand ')
 
     except AttributeError:
         try:
@@ -84,8 +88,9 @@ def get_product_info(response: requests.Response, url: str) -> list[str] | None:
         file.write(text)
     try:
         description = text.split('"redacted_description":{"text":"')[1].split('"}')[0]
-        description = repr(description).replace('\\/', '').replace('\\\\n', ' ')
-        description = sub(r'\\ud\w{3}', '', description)
+        description = description.encode('raw_unicode_escape').decode('unicode_escape').encode('utf-16_BE','surrogatepass').decode('utf-16_BE')
+        # description = repr(description).replace('\\/', '').replace('\\\\n', ' ')
+        # description = sub(r'\\u\w{4}', '', description)  # удалить юникод символы
     except IndexError:
         pass
     current_datetime = datetime.now()
@@ -175,7 +180,8 @@ def login(login, password):
             response_body2 = req.post(xurl, data=data, allow_redirects=True, timeout=300)
             cookie = str(req.cookies.get_dict())[1:-1].replace("'", "").replace(",", ";").replace(":", "=")
             if 'checkpoint' in cookie:
-                sys.exit("\033[1;31mAccount terminated by Facebook!\033[0m")
+                print(f'\033[1;31m***Account terminated by Facebook!***\033[0m')
+                raise UserConnectionError
             elif 'c_user' in cookie:
                 with open('cookies.txt', 'a') as file:
                     file.write(f'{cookie}\n')
@@ -184,6 +190,7 @@ def login(login, password):
                 # sys.exit("\033[38;5;208mIncorrect details\033[0m")
             return cookie
     except requests.exceptions.ConnectionError:
-        sys.exit('No internet')
+        print(f'\033[1;31m*** No internet ***\033[0m')
+        raise UserConnectionError
     except KeyboardInterrupt:
         sys.exit("[+] Stopped!")

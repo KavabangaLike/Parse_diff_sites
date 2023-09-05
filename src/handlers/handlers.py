@@ -2,28 +2,34 @@ import aiogram.exceptions
 from sqlalchemy.exc import IntegrityError
 from aiogram.types.input_media_photo import InputMediaPhoto
 from src.settings import bot, dp
-from database import pg_insert_new_user, pg_select_users_id, pg_change_user_group, pg_change_user_access_period, pg_show_ads
-from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData
+from database import pg_insert_new_user, pg_select_users_id, pg_change_user_group, pg_change_user_access_period, \
+    pg_show_ads, pg_select_facility, pg_select_related_facility, pg_insert_related_facility, pg_delete_related_facility
+from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData, UserFilterCallbackData
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import Command
 from datetime import datetime, timedelta
-# from aiogram import F
+from aiogram import F
 
 
-async def send_all(data: list[str]) -> None:
+async def send_all(data: list[str | datetime]) -> None:
     photos = data[6].split(',')[:10]
     input_media_photos = [InputMediaPhoto(media=url) for url in photos]
     users = pg_select_users_id(['users', 'admins', 'superadmins', 'newbies'])
     list_of_prop = [data[8]]
     list_of_prop.extend(data[3].split(','))
-    descr = data[4].replace('\\n', ' ').replace('\\/', '/')
+    descr = data[4].replace('\\n', ' ').replace('\\/', '/').strip("'")
+    geo = data[-1]
     for id in users:
         try:
             try:
                 await bot.send_media_group(chat_id=id, media=input_media_photos)
             except:
                 await bot.send_message(chat_id=id, text='Фото не получены. Возможно, на сайте видеоматериалы')
-            mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])}</b>\nОписание: {descr[:250] + " ..." if len(descr) > 250 else descr}\n<i>актуально на {data[7]}</i>'
+
+            mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])} <i>{geo}</i></b>\n' \
+                  f'Описание: {descr[:250] + " ..." if len(descr) > 250 else descr}\n<i>актуально на ' \
+                  f'{data[7].strftime("%b %d %Y %H:%M:%S")}</i>'
+
             await bot.send_message(chat_id=id, text=mes,
                                    reply_markup=InlineKeyboards(data[0], data[5]).product_more_buttons(),
                                    disable_web_page_preview=True, parse_mode='HTML')
@@ -80,4 +86,32 @@ async def user_to_users(callback: CallbackQuery, callback_data: UserCallbackData
 @dp.message(Command('pause'))
 async def pause_show_ads(message: Message) -> None:
     pg_show_ads(message.from_user.id, False)
-    await message.answer(text='Новые объявления пока что появляться не будут 😴. Для возобновления введите команду /start')
+    await message.answer(text='😴 Новые объявления пока что появляться не будут. Для возобновления введите команду /start')
+
+
+@dp.message(Command('tune'))
+async def set_product_filter(message: Message):
+    pg_show_ads(message.from_user.id, False)
+    all_periods = pg_select_facility(1)
+    user_periods = pg_select_related_facility(message.from_user.id, 1)
+    await message.answer(text='Выберите период аренды:', reply_markup=InlineKeyboards(all_periods, user_periods, message.from_user.id, 1).user_filter())
+
+
+@dp.callback_query(UserFilterCallbackData.filter(F.type_ == 1))
+async def filter_period_for_rent(callback: CallbackQuery, callback_data: UserFilterCallbackData):
+    pg_insert_related_facility(callback_data.user_id, [callback_data.filter_name])
+    all_periods = pg_select_facility(1)
+    user_periods = pg_select_related_facility(callback_data.user_id, 1)
+    try:
+        await callback.message.edit_reply_markup(
+            reply_markup=InlineKeyboards(param1=all_periods, param2=user_periods,
+                                         param3=callback_data.user_id, param4=callback_data.type_).user_filter()
+        )
+    except aiogram.exceptions.TelegramBadRequest:
+        pg_delete_related_facility(callback_data.user_id, callback_data.filter_name)
+        user_periods = pg_select_related_facility(callback_data.user_id, 1)
+        await callback.message.edit_reply_markup(
+            reply_markup=InlineKeyboards(param1=all_periods, param2=user_periods,
+                                         param3=callback_data.user_id, param4=callback_data.type_).user_filter()
+        )
+

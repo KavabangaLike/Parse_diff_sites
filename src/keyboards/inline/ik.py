@@ -12,16 +12,19 @@ class UserCallbackData(CallbackData, prefix='us'):
     period: Literal['week', '1month', '3month', 'forever', 'day', 'fault']
 
 
-# class UserCallbackData(CallbackData, prefix='ex'):
-#     user_id: PositiveInt
-#     period: Literal['week', 'month', '3month', 'forever']
+class UserFilterCallbackData(CallbackData, prefix='er'):
+    user_id: PositiveInt
+    filter_name: Optional[str]
+    type_: PositiveInt
+    action: Literal['back', 'next', None]
 
 
 class InlineKeyboards:
-    def __init__(self, param1=None, param2=None, param3=None):
+    def __init__(self, param1=None, param2=None, param3=None, param4=None):
         self.param1 = param1
         self.param2 = param2
         self.param3 = param3
+        self.param4 = param4
 
     def product_more_buttons(self) -> InlineKeyboardMarkup:
         ikb1 = InlineKeyboardButton(text='Подробнее', url=self.param1)
@@ -50,3 +53,16 @@ class InlineKeyboards:
             if self.param3 in b.callback_data:
                 b.text += '✅'
         return InlineKeyboardMarkup(inline_keyboard=[ikb_group, ikb_period])
+
+    def user_filter(self):
+        ikb = []
+        for facility in self.param1:
+            b = InlineKeyboardButton(text=facility, callback_data=UserFilterCallbackData(filter_name=facility, user_id=self.param3, type_=self.param4, action=None).pack())
+            ikb.append([b])
+            if facility in self.param2:
+                b.text += ' ✅'
+        ikb.append([
+            InlineKeyboardButton(text='Далее', callback_data='next'),
+            InlineKeyboardButton(text='Назад', callback_data='Назад'),
+        ])
+        return InlineKeyboardMarkup(inline_keyboard=ikb)
