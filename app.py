@@ -31,8 +31,8 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
     urls_to_parse = []
     # print(urls_from_search)
     for url in urls_from_search:
-        if url.split('/')[5].strip() not in urls_in_db:
-            urls_to_parse.append(url)
+        if url[0].split('/')[5].strip() not in urls_in_db:
+            urls_to_parse.append((url[0], url[1]))
     #print(urls_to_parse)
     print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
           f'{geo} - '
@@ -42,12 +42,15 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
     if urls_to_parse:
         for url in urls_to_parse:
             try:
-                data = get_product_info(get_response(url=url, auth_params=auth_params), url=url)  # - cookie
+                data = get_product_info(get_response(url=url[0], auth_params=auth_params), url=url[0])  # - cookie
+                # data = get_product_info(get_response(url=url, auth_params=auth_params), url=url)  # - cookie
                 # data = get_product_info(get_response(url=url, auth_params=auth_params)[0], url=url)  # - cookie
             except AttributeError:
+                print('UserConnectionError')
                 raise UserConnectionError
+
             if data:
-                data.append(geo)
+                data.append(url[1] + f' ({geo})')
                 pg_insert_product(data)
 
                 async def send_data(dat):
@@ -57,16 +60,16 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
                 coroutine = send_data(data)
                 loop.run_until_complete(coroutine)
 
-                sleep(random.uniform(4, 8))
+                sleep(random.uniform(4.5, 10))
             else:
                 print(f'No incoming data !!! from {url}')
     sleep(random.uniform(300, 500))
 
 
 def parsing():
-    # urls_for_parser = pg_select_links()
-    urls_for_parser = ['https://www.facebook.com/marketplace/denpasar/propertyforsale?query=House%20for%20rent&sortBy=best_match',
-                       'https://www.facebook.com/marketplace/denpasar/propertyforsale?query=House%20for%20rent&sortBy=best_match',]
+    urls_for_parser = pg_select_links()
+    # urls_for_parser = ['https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7',
+    #                    'https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7',]
     fb_users = pg_select_fb_users()
     shuffle(fb_users)
     while ...:
@@ -77,11 +80,12 @@ def parsing():
                 while ...:
                     # print(f'<<< Current user is {fb_user[0]} >>>')
                     try:
-                        start_parse(fb_search_url=link, geo=link[2], query=link[1], auth_params=fb_user)
+                        start_parse(fb_search_url=link[0], geo=link[2], query=link[1], auth_params=fb_user)
                     except NoUrlsFromParse:
                         i = 1
                         break
                     except UserConnectionError:
+                        print('UserConnectionError')
                         i = 1
                         break
                     else:

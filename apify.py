@@ -4,7 +4,7 @@ from apify_client import ApifyClient
 def apify_request(url: str) -> str:
     # Initialize the ApifyClient with your API token
     client = ApifyClient("apify_api_Mf0M5vgPSxKHanwrKyIYvlpS1OBwd02Tz6V6")
-    print(url)
+    # print(url)
     # Prepare the Actor input
     run_input = {
         "startUrls": [{"url": url}],

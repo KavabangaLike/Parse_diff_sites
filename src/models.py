@@ -6,7 +6,7 @@ from src.database import Base
 class Product(Base):
     __tablename__ = 'product'
     product_id = Column(BIGINT, unique=True, nullable=False)
-    product_link = Column(VARCHAR(512), unique=True, nullable=False)
+    product_link = Column(VARCHAR(1024), unique=True, nullable=False)
     title = Column(VARCHAR(256), nullable=False)
     land = Column(INT, ForeignKey('land.id', ondelete='RESTRICT'))  # NEW how to add nullable=False?
     price = Column(FLOAT)
@@ -14,7 +14,7 @@ class Product(Base):
     in_month = Column(BOOLEAN, default=True)
     facilities = relationship('ProductFacility', backref='Product')
     description = Column(TEXT)
-    profile_url = Column(VARCHAR(512))
+    profile_url = Column(VARCHAR(832))
     pictures = relationship('Picture', backref='Product')
     expose_datetime = Column(TIMESTAMP, nullable=False)
     status = Column(SMALLINT, default=1, nullable=False)

@@ -12,7 +12,7 @@ from re import sub
 
 
 def get_response(url: str, auth_params: tuple[str], cookie: str = None, proxies=None):
-    proxies = {'https': 'http://yfonarev2020:66ccakAzi7@185.33.85.249:51523'}
+    # proxies = {'https': 'http://yfonarev2020:66ccakAzi7@185.33.85.249:51523'}
     try:
         if not cookie:
             cookie = login(auth_params[0], auth_params[1])
@@ -24,17 +24,26 @@ def get_response(url: str, auth_params: tuple[str], cookie: str = None, proxies=
             "Accept-Language": 'en_US', 'cache-control': 'max-age=0',  # "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
             "Cookie": cookie,  # CHANGE datr
 
-        }, proxies=proxies)
+        })
     except:
         response = None
     finally:
         return response.text
 
 
-def get_urls(response: str) -> list[str]:
+def get_urls(response: str) -> list[tuple[str, str]]:
     soup = BeautifulSoup(response, features='lxml')
     # print(response)
-    return ['https://www.facebook.com' + a['href'] for a in soup.find_all('a') if 'marketplace/item/' in a['href']]
+    blocks = soup.find_all(attrs={
+        'class': 'x9f619 x78zum5 x1r8uery xdt5ytf x1iyjqo2 xs83m0k x1e558r4 x150jy0e x1iorvi4 xjkvuk6 xnpuxes x291uyu x1uepa24'})
+    links_and_geo = []
+    for block in blocks:
+        try:
+            if block.find('a')['href']:
+                links_and_geo.append(('https://www.facebook.com' + block.find('a')['href'].replace('&__tn__=!%3AD', ''), block.find_all('span')[6].text))
+        except TypeError:
+            pass
+    return links_and_geo
 
 
 def handle_price(price_: str):
@@ -54,25 +63,24 @@ def handle_price(price_: str):
     return price_, currency, in_month
 
 
-def get_product_info(response: requests.Response | str, url: str) -> list[str] | None:
-    text = response.text
-    if 'marketplace_listing_title' not in text:
-        return None
+def get_product_info(response, url: str) -> list[str] | None:
+    text = response
+    # if 'marketplace_listing_title' not in text:
+    #     return None
 
-    soup = BeautifulSoup(response.text, features='lxml')
-    title, description, price, product_prop, profile_url, pdp_fields, images = '', '', '', '', '', [], []
+    soup = BeautifulSoup(response, features='lxml')
+    title, description, price, product_prop, profile_url, pdp_fields, images, full_price = '', '', '', '', '', [], [], ''
     try:
         spans = soup.find(
             attrs={'class': 'x1jx94hy x78zum5 xdt5ytf x1lytzrv x6ikm8r x10wlt62 xiylbte xtxwg39'}).find_all(
             'span')
         title = spans[2].text
 
-        price = spans[3].text
+        price_text = spans[3].text
 
-        price, currency, in_month = handle_price(price)
-        full_price = (str(int(price)) + ' ' + currency).replace('000000000', ' billion ').replace('000000', ' mln ')\
-            .replace('000', ' thousand ')
-
+        price, currency, in_month = handle_price(price_text)
+        full_price = (str(int(price)) + ' ' + currency)[::-1].replace('000000000', ' noillib ').replace('000000', ' nlm ')\
+            .replace('000', ' dnasuoht ')[::-1]
     except AttributeError:
         try:
             title = text.split('"marketplace_listing_title":"')[1].split('","')[0].encode('utf-8').decode(
@@ -83,7 +91,6 @@ def get_product_info(response: requests.Response | str, url: str) -> list[str] |
             price, currency, in_month = handle_price(price)
         except IndexError:
             pass
-
     with open('index.html', 'w', encoding='utf-8') as file:
         file.write(text)
     try:
@@ -93,7 +100,7 @@ def get_product_info(response: requests.Response | str, url: str) -> list[str] |
         # description = sub(r'\\u\w{4}', '', description)  # удалить юникод символы
     except IndexError:
         pass
-    current_datetime = datetime.now()
+    current_datetime = datetime.now() + timedelta(hours=8)
     try:
         pdp_fields = text.split('"pdp_fields":[')[1].split(']')[0].split('{"display_label":"')
     except IndexError:
