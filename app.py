@@ -6,11 +6,12 @@ from database import pg_insert_product, pg_select_product_links, pg_select_produ
 from time import sleep
 from src.handlers import handlers
 import asyncio
+from config import DELAY_LIMITER
 # from uses import urls_for_parser
 from src.utils.google_sheet import gh_insert, gh_prepare_data
 from random import shuffle
 from src.types.settings import UserConnectionError, NoUrlsFromParse
-from apify import apify_request
+from apify import smartproxy_request, apify_request
 
 
 def start_parse(fb_search_url: str, auth_params: tuple[str],
@@ -42,7 +43,7 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
     if urls_to_parse:
         for url in urls_to_parse:
             try:
-                data = get_product_info(get_response(url=url[0], auth_params=auth_params), url=url[0])  # - cookie
+                data = get_product_info(smartproxy_request(url_to_parse=url[0]), url=url[0])  # - cookie
                 # data = get_product_info(get_response(url=url, auth_params=auth_params), url=url)  # - cookie
                 # data = get_product_info(get_response(url=url, auth_params=auth_params)[0], url=url)  # - cookie
             except AttributeError:
@@ -60,10 +61,10 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
                 coroutine = send_data(data)
                 loop.run_until_complete(coroutine)
 
-                sleep(random.uniform(4.5, 10))
+                sleep(random.uniform(0.045 * DELAY_LIMITER, 0.1 * DELAY_LIMITER))
             else:
                 print(f'No incoming data !!! from {url}')
-    sleep(random.uniform(300, 500))
+    sleep(random.uniform(3 * DELAY_LIMITER, 5 * DELAY_LIMITER))
 
 
 def parsing():

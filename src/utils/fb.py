@@ -48,11 +48,11 @@ def get_urls(response: str) -> list[tuple[str, str]]:
 
 def handle_price(price_: str):
     factor = 1
-    if 'тыс' in price_:
+    if 'тыс' in price_ or 'K' in price_:
         factor *= 1000
-    elif 'млн' in price_:
+    elif 'млн' in price_ or 'M' in price_:
         factor *= 1000000
-    elif 'млрд' in price_:
+    elif 'млрд' in price_ or 'B' in price_:
         factor *= 1000000000
     in_month = False if '/месяц' not in price_ else True
     currency = 'rp' if 'rp' in price_.lower() else 'IDR' if 'idr' in price_.lower() else '$' if '$' in price_ else ''
@@ -79,8 +79,8 @@ def get_product_info(response, url: str) -> list[str] | None:
         price_text = spans[3].text
 
         price, currency, in_month = handle_price(price_text)
-        full_price = (str(int(price)) + ' ' + currency)[::-1].replace('000000000', ' noillib ').replace('000000', ' nlm ')\
-            .replace('000', ' dnasuoht ')[::-1]
+        full_price = (str(int(price)) + ' ' + currency)[::-1].replace('000000000', 'noillib ').replace('000000', 'nlm ')\
+            .replace('000', 'dnasuoht ')[::-1]
     except AttributeError:
         try:
             title = text.split('"marketplace_listing_title":"')[1].split('","')[0].encode('utf-8').decode(
