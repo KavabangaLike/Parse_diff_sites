@@ -10,6 +10,7 @@ def apify_request(url: str) -> str:
     # Prepare the Actor input
     run_input = {
         "startUrls": [{"url": url}],
+        "headers": {"Viewport-Width:": 3465345, "Content-Length": 124312},
         "priceMin": 0,
         "priceMax": 0,
     }

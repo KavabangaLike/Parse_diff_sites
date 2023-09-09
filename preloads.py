@@ -201,8 +201,3 @@ def pg_select_products(limit: int, offset: int): ##
 
         result = query.all()
         return [*result]
-print(pg_select_products(1, 1))
-
-#with TgUser.session() as session:
-    #users = session.scalars(select(TgUser.user_group_id, TgUser.id)).all()
-    #print(users)

@@ -46,6 +46,34 @@ def get_urls(response: str) -> list[tuple[str, str]]:
     return links_and_geo
 
 
+def products_from_search(page: str) -> list[list]:
+    soup = BeautifulSoup(page, features='lxml')
+    blocks = soup.find_all(attrs={
+        'class': 'x9f619 x78zum5 x1r8uery xdt5ytf x1iyjqo2 xs83m0k x1e558r4 x150jy0e x1iorvi4 xjkvuk6 xnpuxes x291uyu x1uepa24'})
+    ads_data = []
+    for block in blocks:
+        try:
+            if block.find('a')['href']:
+                product_link = 'https://www.facebook.com' + block.find('a')['href'].replace('&__tn__=!%3AD', '')
+                geolocation = block.find_all('span')[6].text
+                price = block.find_all('span')[2].text
+                title = block.find_all('span')[4].text
+                current_datetime = datetime.now() + timedelta(hours=8)
+                image = block.find('img')['src']
+                digit_price = ''.join([i for i in price if i.isdigit()])
+                if digit_price:
+                    digit_price = float(digit_price)
+                else:
+                    digit_price = 0.0
+                print(digit_price)
+                ads_data.append([product_link, title, digit_price,
+                                 'None from search', 'None from search', 'None from search', image, current_datetime,
+                                 price, geolocation])
+        except TypeError:
+            pass
+    return ads_data
+
+
 def handle_price(price_: str):
     factor = 1
     if 'тыс' in price_ or 'K' in price_:

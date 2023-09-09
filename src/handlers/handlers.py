@@ -18,6 +18,8 @@ async def send_all(data: list[str | datetime]) -> None:
     list_of_prop = [data[8]]
     list_of_prop.extend(data[3].split(','))
     descr = data[4].replace('\\n', ' ').replace('\\/', '/').strip("'")
+    descr = data[1]
+    list_of_prop = ''
     geo = data[-1]
     for id in users:
         try:

@@ -1,7 +1,7 @@
 import multiprocessing
 import random
 from datetime import datetime
-from src.utils.fb import get_product_info, get_response, get_urls, if_url_active
+from src.utils.fb import get_product_info, get_response, get_urls, if_url_active, products_from_search
 from database import pg_insert_product, pg_select_product_links, pg_select_products, pg_select_fb_users, pg_select_links
 from time import sleep
 from src.handlers import handlers
@@ -14,7 +14,45 @@ from src.types.settings import UserConnectionError, NoUrlsFromParse
 from apify import smartproxy_request, apify_request
 
 
-def start_parse(fb_search_url: str, auth_params: tuple[str],
+def async_tg_send(data):
+    async def send_data(dat):
+        await handlers.send_all(dat)
+
+    loop = asyncio.get_event_loop()
+    coroutine = send_data(data)
+    loop.run_until_complete(coroutine)
+
+
+def parse_search_only(fb_search_url: str, geo: str):
+    response = apify_request(url=fb_search_url)
+    urls_from_search = products_from_search(page=response)
+    if not urls_from_search:
+        print(f'\033[1;31m***Parse no links, {geo}***\033[0m')
+        sleep(random.uniform(25.0, 45.0))
+        raise NoUrlsFromParse
+
+    urls_in_db = [str(i) for i in pg_select_product_links()]
+    urls_to_parse = []
+    for url_data in urls_from_search:
+        if url_data[0].split('/')[5].strip() not in urls_in_db:
+            urls_to_parse.append(url_data)
+
+    print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
+          f'{geo} - '
+          f'Total: {len(urls_from_search)} New: {len(urls_to_parse)}')
+
+    if urls_to_parse:
+        for data in urls_to_parse:
+            data[-1] = data[-1] + f' ({geo})'
+            pg_insert_product(data)
+
+            async_tg_send(data=data)
+
+            # sleep(random.uniform(0.045 * DELAY_LIMITER, 0.1 * DELAY_LIMITER))
+    sleep(random.uniform(3 * DELAY_LIMITER, 5 * DELAY_LIMITER))
+
+
+def start_parse_detail(fb_search_url: str, auth_params: tuple[str],
                 geo: str = None, query: str = None) -> None:
     try:
         response = apify_request(url=fb_search_url)
@@ -54,12 +92,7 @@ def start_parse(fb_search_url: str, auth_params: tuple[str],
                 data.append(url[1] + f' ({geo})')
                 pg_insert_product(data)
 
-                async def send_data(dat):
-                    await handlers.send_all(dat)
-
-                loop = asyncio.get_event_loop()
-                coroutine = send_data(data)
-                loop.run_until_complete(coroutine)
+                async_tg_send(data=data)
 
                 sleep(random.uniform(0.045 * DELAY_LIMITER, 0.1 * DELAY_LIMITER))
             else:
@@ -81,7 +114,7 @@ def parsing():
                 while ...:
                     # print(f'<<< Current user is {fb_user[0]} >>>')
                     try:
-                        start_parse(fb_search_url=link[0], geo=link[2], query=link[1], auth_params=fb_user)
+                        parse_search_only(fb_search_url=link[0], geo=link[2])
                     except NoUrlsFromParse:
                         i = 1
                         break
