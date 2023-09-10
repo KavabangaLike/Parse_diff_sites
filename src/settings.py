@@ -3,6 +3,8 @@ from aiogram import Bot, Dispatcher
 # from aiogram.types import BotCommand, BotCommandScope, BotCommandScopeAllPrivateChats
 # from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
+
 from src.types.settings import TOKEN
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,5 +15,5 @@ bot = Bot(
     parse_mode=ParseMode.HTML,
 )
 
-dp = Dispatcher()
+dp = Dispatcher(storage=MemoryStorage())
 

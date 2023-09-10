@@ -1,6 +1,6 @@
 from src.models import Product, TgUser, FbUser, SearchLink, Land, Currency, ProductFacility, Facility, Picture, \
-    UserGroup, UserFacility
-from sqlalchemy import select, or_
+    UserGroup, UserFacility, UserLand
+from sqlalchemy import select, or_, delete
 from datetime import datetime
 
 
@@ -145,11 +145,42 @@ def pg_delete_related_facility(user_id, facility_name: str):  # WARNING
         session.query(UserFacility).filter(UserFacility.facility_id.in_(f_id.subquery())).filter(UserFacility.user_id == user_id).delete(synchronize_session=False)
         session.commit()
 
-# gh_insert(*gh_prepare_data(*pg_select_products(1, 45)))
-# pg_insert_related_facility('643668236', ['месяц', 'год', 'бассейн', 'стиральная машина'])
-# print(pg_select_related_facility('643668236', 3))
-# print(pg_select_facility(1))
 
-# pg_delete_related_facility('643668236', 'бассейн')
-# print(pg_select_links())
-#pg_select_products(10, 0)
+def pg_select_lands() -> list[str]:
+    with Land.session() as session:
+        return session.scalars(select(Land.name)).all()
+
+
+def pg_select_related_lands(user_id):
+    with UserLand.session() as session:
+        lands = session.query(Land).select_from(UserLand).join(Land).filter(UserLand.user_id == user_id).all()
+        return [i.name for i in lands]
+
+
+def pg_del_related_lands(user_id):
+    with UserLand.session() as session:
+        session.query(UserLand).filter(UserLand.user_id == user_id).delete(synchronize_session=False)
+        session.commit()
+
+
+def pg_insert_related_lands(user_id, lands):
+    with UserLand.session() as session:
+        lands_id = session.scalars(select(Land.id).filter(Land.name.in_(lands)))
+        uls = []
+        for land_id in lands_id:
+            uls.append(UserLand(user_id=user_id, land_id=land_id))
+        session.add_all(uls)
+        session.commit()
+        for ul in uls:
+            session.refresh(ul)
+
+
+def pg_select_userland_user(land: str) -> list:
+    with UserLand.session() as session:
+        ids = session.query(UserLand.user_id).select_from(UserLand).join(Land).filter(Land.name == land).all()
+        return [i[0] for i in ids]
+
+
+# print(pg_select_userland_user('Ubud'))
+# print(pg_select_lands())
+# pg_select_related_lands(user_id='643668236')

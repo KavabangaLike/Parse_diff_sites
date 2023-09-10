@@ -12,11 +12,10 @@ class UserCallbackData(CallbackData, prefix='us'):
     period: Literal['week', '1month', '3month', 'forever', 'day', 'fault']
 
 
-class UserFilterCallbackData(CallbackData, prefix='er'):
-    user_id: PositiveInt
+class UserFilterCallbackData(CallbackData, prefix='bt'):
     filter_name: Optional[str]
-    type_: PositiveInt
-    action: Literal['back', 'next', None]
+    # type_: PositiveInt
+    # action: Literal['back', 'next', None]
 
 
 class InlineKeyboards:
@@ -33,16 +32,24 @@ class InlineKeyboards:
 
     def handle_user(self) -> InlineKeyboardMarkup:
         ikb_group = [
-            InlineKeyboardButton(text='ADMINS', callback_data=UserCallbackData(group='admins', user_id=self.param1, period=self.param3).pack()),
-            InlineKeyboardButton(text='USERS', callback_data=UserCallbackData(group='users', user_id=self.param1, period=self.param3).pack()),
-            InlineKeyboardButton(text='NEWBIES', callback_data=UserCallbackData(group='newbies', user_id=self.param1, period=self.param3).pack()),
-            ]
+            InlineKeyboardButton(text='ADMINS', callback_data=UserCallbackData(group='admins', user_id=self.param1,
+                                                                               period=self.param3).pack()),
+            InlineKeyboardButton(text='USERS', callback_data=UserCallbackData(group='users', user_id=self.param1,
+                                                                              period=self.param3).pack()),
+            InlineKeyboardButton(text='NEWBIES', callback_data=UserCallbackData(group='newbies', user_id=self.param1,
+                                                                                period=self.param3).pack()),
+        ]
         ikb_period = [
-            InlineKeyboardButton(text='♾', callback_data=UserCallbackData(period='forever', user_id=self.param1, group=self.param2).pack()),
-            InlineKeyboardButton(text='3 MO.', callback_data=UserCallbackData(period='3month', user_id=self.param1, group=self.param2).pack()),
-            InlineKeyboardButton(text='MO.', callback_data=UserCallbackData(period='1month', user_id=self.param1, group=self.param2).pack()),
-            InlineKeyboardButton(text='WE.', callback_data=UserCallbackData(period='week', user_id=self.param1, group=self.param2).pack()),
-            InlineKeyboardButton(text='✖️', callback_data=UserCallbackData(period='fault', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='♾', callback_data=UserCallbackData(period='forever', user_id=self.param1,
+                                                                          group=self.param2).pack()),
+            InlineKeyboardButton(text='3 MO.', callback_data=UserCallbackData(period='3month', user_id=self.param1,
+                                                                              group=self.param2).pack()),
+            InlineKeyboardButton(text='MO.', callback_data=UserCallbackData(period='1month', user_id=self.param1,
+                                                                            group=self.param2).pack()),
+            InlineKeyboardButton(text='WE.', callback_data=UserCallbackData(period='week', user_id=self.param1,
+                                                                            group=self.param2).pack()),
+            InlineKeyboardButton(text='✖️', callback_data=UserCallbackData(period='fault', user_id=self.param1,
+                                                                           group=self.param2).pack()),
         ]
         for button in ikb_group + ikb_period:
             button.text.replace(' ✅', '')
@@ -57,12 +64,21 @@ class InlineKeyboards:
     def user_filter(self):
         ikb = []
         for facility in self.param1:
-            b = InlineKeyboardButton(text=facility, callback_data=UserFilterCallbackData(filter_name=facility, user_id=self.param3, type_=self.param4, action=None).pack())
+            b = InlineKeyboardButton(text=facility, callback_data=UserFilterCallbackData(filter_name=facility).pack())
             ikb.append([b])
             if facility in self.param2:
                 b.text += ' ✅'
         ikb.append([
-            InlineKeyboardButton(text='Далее', callback_data='next'),
-            InlineKeyboardButton(text='Назад', callback_data='Назад'),
+            InlineKeyboardButton(text='Отмена', callback_data='cancel'),
+            InlineKeyboardButton(text='Далее', callback_data='filter_preview'),
+
         ])
         return InlineKeyboardMarkup(inline_keyboard=ikb)
+
+    @staticmethod
+    def save_filter_config():
+        ikb = [
+            InlineKeyboardButton(text='Отмена', callback_data='cancel'),
+            InlineKeyboardButton(text='Сохранить', callback_data='save_config'),
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=[ikb])
