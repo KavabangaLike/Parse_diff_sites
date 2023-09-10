@@ -14,7 +14,14 @@ urls_for_parser = [
     ('Sanur',
      'https://www.facebook.com/marketplace/denpasar/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.6944&longitude=115.2597&radius=7', '',
      ),
-
+    ('Tabanan',
+     'https://www.facebook.com/marketplace/115971211750713/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5333&longitude=115.133&radius=4',
+     '',
+     ),
+    ('Ungasan',
+     'https://www.facebook.com/marketplace/107286902636860/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.8271&longitude=115.168&radius=4.5',
+     '',
+     ),
 ]
 
 

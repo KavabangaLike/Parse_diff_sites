@@ -32,24 +32,16 @@ class InlineKeyboards:
 
     def handle_user(self) -> InlineKeyboardMarkup:
         ikb_group = [
-            InlineKeyboardButton(text='ADMINS', callback_data=UserCallbackData(group='admins', user_id=self.param1,
-                                                                               period=self.param3).pack()),
-            InlineKeyboardButton(text='USERS', callback_data=UserCallbackData(group='users', user_id=self.param1,
-                                                                              period=self.param3).pack()),
-            InlineKeyboardButton(text='NEWBIES', callback_data=UserCallbackData(group='newbies', user_id=self.param1,
-                                                                                period=self.param3).pack()),
-        ]
+            InlineKeyboardButton(text='ADMINS', callback_data=UserCallbackData(group='admins', user_id=self.param1, period=self.param3).pack()),
+            InlineKeyboardButton(text='USERS', callback_data=UserCallbackData(group='users', user_id=self.param1, period=self.param3).pack()),
+            InlineKeyboardButton(text='NEWBIES', callback_data=UserCallbackData(group='newbies', user_id=self.param1, period=self.param3).pack()),
+            ]
         ikb_period = [
-            InlineKeyboardButton(text='♾', callback_data=UserCallbackData(period='forever', user_id=self.param1,
-                                                                          group=self.param2).pack()),
-            InlineKeyboardButton(text='3 MO.', callback_data=UserCallbackData(period='3month', user_id=self.param1,
-                                                                              group=self.param2).pack()),
-            InlineKeyboardButton(text='MO.', callback_data=UserCallbackData(period='1month', user_id=self.param1,
-                                                                            group=self.param2).pack()),
-            InlineKeyboardButton(text='WE.', callback_data=UserCallbackData(period='week', user_id=self.param1,
-                                                                            group=self.param2).pack()),
-            InlineKeyboardButton(text='✖️', callback_data=UserCallbackData(period='fault', user_id=self.param1,
-                                                                           group=self.param2).pack()),
+            InlineKeyboardButton(text='♾', callback_data=UserCallbackData(period='forever', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='3 MO.', callback_data=UserCallbackData(period='3month', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='MO.', callback_data=UserCallbackData(period='1month', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='WE.', callback_data=UserCallbackData(period='week', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='✖️', callback_data=UserCallbackData(period='fault', user_id=self.param1, group=self.param2).pack()),
         ]
         for button in ikb_group + ikb_period:
             button.text.replace(' ✅', '')
@@ -68,6 +60,13 @@ class InlineKeyboards:
             ikb.append([b])
             if facility in self.param2:
                 b.text += ' ✅'
+
+        for button in ikb[::2]:  # сортировка в 2 столбца
+            try:
+                ikb[ikb.index(button)] = button + ikb.pop(ikb.index(button) + 1)
+            except IndexError:
+                pass
+
         ikb.append([
             InlineKeyboardButton(text='Отмена', callback_data='cancel'),
             InlineKeyboardButton(text='Далее', callback_data='filter_preview'),

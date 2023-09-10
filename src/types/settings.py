@@ -1,11 +1,11 @@
 from pydantic import SecretStr, PostgresDsn, RedisDsn
 
-DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'  # docker db
-# DATABASE_URL = 'postgresql://bot:qwerty@127.0.0.1:5432/bot'  # local db
+# DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'  # docker db
+DATABASE_URL = 'postgresql://bot:qwerty@127.0.0.1:5432/bot'  # local db
 
 # TOKEN = '6306652:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU'  # main TOKEN
-TOKEN = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
-# TOKEN = '5888133619:AAE1XW55jVt-pqpkXma1PcmoNGFK8m0v9eE'  # test TOKEn weather
+# TOKEN = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
+TOKEN = '5888133619:AAE1XW55jVt-pqpkXma1PcmoNGFK8m0v9eE'  # test TOKEn weather
 
 
 class Settings:
