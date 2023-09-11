@@ -23,7 +23,7 @@ async def send_all(data: list[str | datetime]) -> None:
     list_of_prop.extend(data[3].split(','))
     # descr = data[4].replace('\\n', ' ').replace('\\/', '/').strip("'")
     descr = data[1]
-    list_of_prop = ''
+    list_of_prop, price = '', data[2]
     geo, land = data[-1], data[-1].split('(')[1].replace(')', '').strip()
 
     users_land_filter = pg_select_userland_user(land=land)
@@ -36,7 +36,7 @@ async def send_all(data: list[str | datetime]) -> None:
             except:
                 await bot.send_message(chat_id=id_, text='Фото не получены. Возможно, на сайте видеоматериалы')
 
-            mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])} <i>{geo}</i></b>\n' \
+            mes = f'<b>{"🔹".join([f" {i} " for i in list_of_prop if i])}{price} <i>{geo}</i></b>\n' \
                   f'Описание: {descr[:250] + " ..." if len(descr) > 250 else descr}\n<i>актуально на ' \
                   f'{data[7].strftime("%b %d %Y %H:%M:%S")}</i>'
 
