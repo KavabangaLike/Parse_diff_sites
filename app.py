@@ -24,7 +24,7 @@ def async_tg_send(data):
 
 
 def parse_search_only(fb_search_url: str, geo: str):
-    response = apify_request(url=fb_search_url)
+    response = smartproxy_request(url_=fb_search_url)
     urls_from_search = products_from_search(page=response)
     if not urls_from_search:
         print(f'\033[1;31m***Parse no links, {geo}***\033[0m')

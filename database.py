@@ -60,17 +60,17 @@ def pg_insert_new_user(user_id: str, access_expire: datetime, username: str, rol
         session.refresh(user)
 
 
-def pg_select_users_id(groups: list[str]) -> list[str]:  #
+def pg_select_users(groups: list[str]) -> list[TgUser]:  #
     users = []
-    for group in groups:
-        with TgUser.session() as session:
-            query = session.query(TgUser.id).join(UserGroup) \
-                .filter(UserGroup.name == group) \
-                .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None)) \
-                .filter(TgUser.show_products == True)
-            users.extend(query.all())
-    return [i[0] for i in users]
+    with TgUser.session() as session:
+        query = session.query(TgUser.id, TgUser.min_price, TgUser.max_price).join(UserGroup) \
+            .filter(UserGroup.name.in_(groups)) \
+            .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None)) \
+            .filter(TgUser.show_products == True)
+        users.extend(query.all())
+    return users
 
+# print(pg_select_users(['users', 'admins', 'superadmins', 'newbies'])
 
 def pg_select_fb_users():  #
     with FbUser.session() as session:
@@ -124,7 +124,7 @@ def pg_select_facility(type_: int):
 
 def pg_select_related_facility(user_id, type_: int):
     with UserFacility.session() as session:
-        query = session.query(Facility.name).select_from(UserFacility).join(Facility).filter(Facility.type == type_)\
+        query = session.query(Facility.name).select_from(UserFacility).join(Facility).filter(Facility.type == type_) \
             .filter(UserFacility.user_id == user_id)
         return [i[0] for i in query.all()]
 
@@ -142,7 +142,8 @@ def pg_insert_related_facility(user_id, facility_names: list[str]):
 def pg_delete_related_facility(user_id, facility_name: str):  # WARNING
     with UserFacility.session() as session:
         f_id = session.query(Facility.id).filter(Facility.name == facility_name)
-        session.query(UserFacility).filter(UserFacility.facility_id.in_(f_id.subquery())).filter(UserFacility.user_id == user_id).delete(synchronize_session=False)
+        session.query(UserFacility).filter(UserFacility.facility_id.in_(f_id.subquery())).filter(
+            UserFacility.user_id == user_id).delete(synchronize_session=False)
         session.commit()
 
 
@@ -179,6 +180,18 @@ def pg_select_userland_user(land: str) -> list:
     with UserLand.session() as session:
         ids = session.query(UserLand.user_id).select_from(UserLand).join(Land).filter(Land.name == land).all()
         return [i[0] for i in ids]
+
+
+def pg_update_user_price(price_type: str, price_value: int, user_id):
+    with TgUser.session() as session:
+        current_user = session.get(TgUser, user_id)
+        if price_type == 'min_price':
+            current_user.min_price = price_value
+        elif price_type == 'max_price':
+            current_user.max_price = price_value
+        session.add(current_user)
+        session.commit()
+
 
 
 # print(pg_select_userland_user('Ubud'))

@@ -22,18 +22,18 @@ def apify_request(url: str) -> str:
     return str([*client.dataset(run["defaultDatasetId"]).iterate_items()])
 
 
-def smartproxy_request(url_to_parse: str) -> str:
+def smartproxy_request(url_: str) -> str:
     url = "https://scrape.smartproxy.com/v1/tasks"
 
     payload = {
         "target": "universal",
         "headless": "html",
-        "url": f"{url_to_parse}"
+        "url": f"{url_}"
     }
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": "Basic VTAwMDAxMTk0ODY6UCRXMWUyNDdhNDU2MzA2MWYyZTc0MDc5Mzc5MmNiM2YwY2Nl"
+        "Authorization": "Basic VTAwMDAxMjEyOTI6UCRXMTdiNzE3MGYxYzZmNTUyMTI0Zjg3ODQ4OTNlODQ4MjFm"
     }
 
     re = requests.request("POST", url, json=payload, headers=headers).text

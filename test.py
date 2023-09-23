@@ -1,33 +1,6 @@
-from datetime import datetime, timedelta
-
 import requests
-import json
 
-from bs4 import BeautifulSoup
-
-from apify import apify_request
-
-
-def products_from_search(page: str) -> list[list]:
-    soup = BeautifulSoup(page, features='lxml')
-    blocks = soup.find_all(attrs={
-        'class': 'x9f619 x78zum5 x1r8uery xdt5ytf x1iyjqo2 xs83m0k x1e558r4 x150jy0e x1iorvi4 xjkvuk6 xnpuxes x291uyu x1uepa24'})
-    ads_data = []
-    for block in blocks:
-        try:
-            if block.find('a')['href']:
-                product_link = 'https://www.facebook.com' + block.find('a')['href'].replace('&__tn__=!%3AD', '')
-                geolocation = block.find_all('span')[6].text
-                price = block.find_all('span')[2].text
-                title = block.find_all('span')[4].text
-                current_datetime = datetime.now() + timedelta(hours=8)
-                image = block.find('img')['src']
-                for n, i in enumerate(block.find_all('span')):
-                    print(n, i.text)
-                ads_data.append([product_link, title, [i for i in price if i.isdigit()], 'None from search', 'None from search', 'None from search', image, current_datetime, price, geolocation])
-        except TypeError:
-            pass
-    return ads_data
-
-
-print(products_from_search(page=apify_request(url='https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7')))
+headers = {'User-Agent': 'Mozilla/5.0 (Linux; Android 12; Pixel 6 Build/SQ3A.220705.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/116.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/407.0.0.0.65;]', "Accept-Language": 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7', 'Accept': 'image/avif,image/webp,*/*', 'Connection': 'keep-alive', 'Cookie': 'datr=z4nCZKF-sdrRMplv6IhIbFHr; sb=7F3FZO0sgIfcfmts9EvPeyvt; m_ls=%7B%22c%22%3A%7B%221%22%3A%22HCwAABYWFqSr9vkIEwUWqJzCz6nCLQA%22%2C%222%22%3A%22GSwVQBxMAAAWARa00IbNDBYAABV-HEwAABYAFrTQhs0MFgAAFigA%22%2C%2295%22%3A%22HCwAABYMFrKJ5ocKEwUWqJzCz6nCLQA%22%7D%2C%22d%22%3A%2222339292-7b29-41bb-b2bf-962a311c3444%22%2C%22s%22%3A%220%22%2C%22u%22%3A%226kp80k%22%7D; fr=0WWSukZF7cM2EUcAm.AWVjcJAo3QTbcraMgHfGo_FJdb4.Bk3ZKn.6b.AAA.0.0.BlAICh.AWWh0tZWucA; wd=1536x739; dpr=1.25'}
+url = 'https://www.facebook.com/marketplace/115971211750713/propertyrentals/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5333&longitude=115.133&radius=4'
+re = requests.get(url=url, headers=headers, coockie='datr=z4nCZKF-sdrRMplv6IhIbFHr; sb=7F3FZO0sgIfcfmts9EvPeyvt; m_ls=%7B%22c%22%3A%7B%221%22%3A%22HCwAABYWFqSr9vkIEwUWqJzCz6nCLQA%22%2C%222%22%3A%22GSwVQBxMAAAWARa00IbNDBYAABV-HEwAABYAFrTQhs0MFgAAFigA%22%2C%2295%22%3A%22HCwAABYMFrKJ5ocKEwUWqJzCz6nCLQA%22%7D%2C%22d%22%3A%2222339292-7b29-41bb-b2bf-962a311c3444%22%2C%22s%22%3A%220%22%2C%22u%22%3A%226kp80k%22%7D; fr=0WWSukZF7cM2EUcAm.AWVjcJAo3QTbcraMgHfGo_FJdb4.Bk3ZKn.6b.AAA.0.0.BlAICh.AWWh0tZWucA; wd=1536x739; dpr=1.25').text.encode('raw_unicode_escape').decode('unicode_escape').encode('utf-16_BE','surrogatepass').decode('utf-16_BE')
+print(re)

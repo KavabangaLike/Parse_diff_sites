@@ -1,6 +1,6 @@
 from pydantic import SecretStr, PostgresDsn, RedisDsn
 
-DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot'  # docker db
+DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot2'  # docker db
 # DATABASE_URL = 'postgresql://bot:qwerty@127.0.0.1:5432/bot'  # local db
 
 # TOKEN = '6306652:AAE_CO07WXocfidvniOKJ4HloTzjaYA0QzU'  # main TOKEN

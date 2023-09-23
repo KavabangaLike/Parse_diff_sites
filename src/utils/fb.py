@@ -97,7 +97,7 @@ def get_product_info(response, url: str) -> list[str] | None:
     #     return None
 
     soup = BeautifulSoup(response, features='lxml')
-    title, description, price, product_prop, profile_url, pdp_fields, images, full_price = '', '', '', '', '', [], [], ''
+    title, description, price, product_prop, profile_url, pdp_fields, images, full_price = '', '', 0.0, '', '', [], [], ''
     try:
         spans = soup.find(
             attrs={'class': 'x1jx94hy x78zum5 xdt5ytf x1lytzrv x6ikm8r x10wlt62 xiylbte xtxwg39'}).find_all(

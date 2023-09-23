@@ -58,6 +58,8 @@ class TgUser(Base):   # !!!!!!!!!!!!!!!!!!!!!!!!
     access_expire = Column(TIMESTAMP, nullable=True)  #заканчиваться доступ к объявлениям
     show_products = Column(BOOLEAN, default=True)  # показывать объявления (кнопка стоп)
     user_group_id = Column(INT, ForeignKey('user_group.id', ondelete='RESTRICT'), nullable=False)
+    min_price = Column(BIGINT)
+    max_price = Column(BIGINT)
 
 
 class UserLand(Base):  # Показ только объявлений на определенной территории
