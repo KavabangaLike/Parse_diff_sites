@@ -2,24 +2,24 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from src.models import SearchLink, FbUser, Land, TgUser, UserGroup, Currency, Facility, Product, Picture
+from src.database.models import SearchLink, FbUser, Land, TgUser, UserGroup, Currency, Facility, Product, Picture
 
 urls_for_parser = [
     ('Ubud',
-     'https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7', '',
+     'https://www.facebook.com/marketplace/denpasar/propertyrentals?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7', '',
      ),
     ('Canggu',
-     'https://www.facebook.com/marketplace/107286902636860/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.6558&longitude=115.1342&radius=7', '',
+     'https://www.facebook.com/marketplace/107286902636860/propertyrentals/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.6558&longitude=115.1342&radius=7', '',
      ),
     ('Sanur',
-     'https://www.facebook.com/marketplace/denpasar/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.6944&longitude=115.2597&radius=7', '',
+     'https://www.facebook.com/marketplace/denpasar/propertyrentals/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.6944&longitude=115.2597&radius=7', '',
      ),
     ('Tabanan',
-     'https://www.facebook.com/marketplace/115971211750713/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5333&longitude=115.133&radius=4',
+     'https://www.facebook.com/marketplace/115971211750713/propertyrentals/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5333&longitude=115.133&radius=4',
      '',
      ),
     ('Ungasan',
-     'https://www.facebook.com/marketplace/107286902636860/propertyforsale/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.8271&longitude=115.168&radius=4.5',
+     'https://www.facebook.com/marketplace/107286902636860/propertyrentals/?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.8271&longitude=115.168&radius=4.5',
      '',
      ),
 ]

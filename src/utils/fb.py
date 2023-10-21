@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import os, sys, time, random, requests
 from bs4 import BeautifulSoup as bs
 from datetime import datetime, timedelta
-from src.types.settings import UserConnectionError
+from src.validation.settings import UserConnectionError
 from re import sub
 
 # sys.stdin.reconfigure(encoding='unicode_escape')
@@ -65,7 +65,7 @@ def products_from_search(page: str) -> list[list]:
                     digit_price = float(digit_price)
                 else:
                     digit_price = 0.0
-                print(digit_price)
+                # print(digit_price)
                 ads_data.append([product_link, title, digit_price,
                                  'None from search', 'None from search', 'None from search', image, current_datetime,
                                  price, geolocation])

@@ -1,4 +1,3 @@
-from src.models import Facility, Keyword
 from database import pg_select_facility
 
 

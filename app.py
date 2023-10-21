@@ -1,7 +1,7 @@
 import multiprocessing
 import random
 from datetime import datetime
-from src.utils.fb import get_product_info, get_response, get_urls, if_url_active, products_from_search
+from src.utils.fb import get_product_info, get_urls, products_from_search
 from database import pg_insert_product, pg_select_product_links, pg_select_products, pg_select_fb_users, pg_select_links
 from time import sleep
 from src.handlers import handlers
@@ -10,8 +10,8 @@ from config import DELAY_LIMITER
 # from uses import urls_for_parser
 from src.utils.google_sheet import gh_insert, gh_prepare_data
 from random import shuffle
-from src.types.settings import UserConnectionError, NoUrlsFromParse
-from apify import smartproxy_request, apify_request
+from src.validation.settings import UserConnectionError, NoUrlsFromParse
+from src.utils.web_api_services import smartproxy_request, apify_request
 
 
 def async_tg_send(data):
@@ -153,4 +153,5 @@ if __name__ == "__main__":
     processes = [parsing]
     for process in processes:
         multiprocessing.Process(target=process).start()
+
 

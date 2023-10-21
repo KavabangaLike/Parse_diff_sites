@@ -1,6 +1,6 @@
 from sqlalchemy import Column, VARCHAR, BOOLEAN, INT, ForeignKey, TEXT, SMALLINT, FLOAT, TIMESTAMP, BIGINT
 from sqlalchemy.orm import relationship
-from src.database import Base
+from .base import Base
 
 
 class Product(Base):

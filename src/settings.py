@@ -5,13 +5,13 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from src.types.settings import TOKEN
+from src.validation.settings import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-# SETTINGS = Settings()
+
 
 bot = Bot(
-    token=TOKEN,
+    token=settings.BOT_TOKEN.get_secret_value(),
     parse_mode=ParseMode.HTML,
 )
 

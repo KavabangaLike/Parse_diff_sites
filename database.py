@@ -1,6 +1,6 @@
-from src.models import Product, TgUser, FbUser, SearchLink, Land, Currency, ProductFacility, Facility, Picture, \
+from src.database.models import Product, TgUser, FbUser, SearchLink, Land, Currency, Facility, Picture, \
     UserGroup, UserFacility, UserLand
-from sqlalchemy import select, or_, delete
+from sqlalchemy import select, or_
 from datetime import datetime
 
 

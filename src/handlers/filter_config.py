@@ -1,4 +1,3 @@
-import aiogram
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -7,9 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from src.keyboards.inline import ik
 from database import pg_show_ads, pg_select_lands, pg_select_related_lands, pg_del_related_lands, \
     pg_insert_related_lands, pg_update_user_price
-from src.keyboards.inline.ik import UserFilterCallbackData, InlineKeyboards
-from src.models import TgUser
-from sqlalchemy import insert
+from src.keyboards.inline.ik import UserFilterCallbackData
 from src.settings import bot
 from aiogram.exceptions import TelegramBadRequest
 

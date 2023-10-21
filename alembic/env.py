@@ -3,9 +3,9 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from src.models import Base
+from src.database.base import Base
 from alembic import context
-from src.types.settings import Settings, DATABASE_URL
+from src.validation.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -40,7 +40,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option(DATABASE_URL)
+    url = config.get_main_option(settings.DATABASE_URL.unicode_string())
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -60,7 +60,7 @@ def run_migrations_online() -> None:
 
     """
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}) | {'sqlalchemy.url': DATABASE_URL},
+        config.get_section(config.config_ini_section, {}) | {'sqlalchemy.url': settings.DATABASE_URL.unicode_string()},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
