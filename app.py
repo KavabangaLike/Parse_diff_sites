@@ -24,8 +24,21 @@ def async_tg_send(data):
 
 
 def parse_search_only(fb_search_url: str, geo: str):
-    response = smartproxy_request(url_=fb_search_url)
-    urls_from_search = products_from_search(page=response)
+    try:
+        response = smartproxy_request(url_=fb_search_url)
+    except Exception as ex:
+        print(datetime.now(), "Connection Error××××××××××××")
+        print(ex)
+        sleep(random.uniform(50.0, 140.0))
+        raise NoUrlsFromParse
+
+    try:
+        urls_from_search = products_from_search(page=response)
+    except:
+        print("No LINKS")
+        sleep(random.uniform(100.0, 175.0))
+        raise NoUrlsFromParse
+
     if not urls_from_search:
         print(f'\033[1;31m***Parse no links, {geo}***\033[0m')
         sleep(random.uniform(25.0, 45.0))
@@ -106,6 +119,7 @@ def parsing():
     #                    'https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7',]
     fb_users = pg_select_fb_users()
     shuffle(fb_users)
+    shuffle(urls_for_parser)
     while ...:
         for fb_user in fb_users:
             i, user_links_count = 0, 0  # индикатор ошибок, счетчик обработанных ссылок

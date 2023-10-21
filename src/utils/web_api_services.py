@@ -33,7 +33,9 @@ def smartproxy_request(url_: str) -> str:
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": "Basic VTAwMDAxMjEyOTI6UCRXMTdiNzE3MGYxYzZmNTUyMTI0Zjg3ODQ4OTNlODQ4MjFm"
+        "Authorization": "Basic VTAwMDAxMjY5ODM6UCRXMWU5Y2U4ODljMTU2M2E5OTUyMTZmZGY0MWVmZWViYmIw"
+        # "Authorization": "Basic VTAwMDAxMjM2NDY6UCRXMTU5NjUzNDE1MzE5NGEyYzdlYmNjZWIxNDIyMTUyZDNm"
+
     }
 
     re = requests.request("POST", url, json=payload, headers=headers).text
