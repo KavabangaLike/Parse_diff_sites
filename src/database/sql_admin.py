@@ -21,8 +21,8 @@ class AdminAuth(AuthenticationBackend):
     async def login(self, request: Request) -> bool:
         form = await request.form()
         username, password = form["username"], form["password"]
-        valid_usernames = ["admin"]
-        valid_passwords = ["fb_Admin"]
+        valid_usernames = ["admin", "root"]
+        valid_passwords = ["fb_Admin", "Cloudy2c"]
         # Validate username/password credentials
         # And update session
         request.session.update({"token": "..."})

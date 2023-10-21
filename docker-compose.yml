@@ -9,8 +9,8 @@ services:
     volumes:
       - .:/bot
     environment:
-      - BOT_TOKEN=6249543267:AAEOPQvoj6Zo6-ufviJjZ6yTZ8Z6OPkqoXY
-      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot
+      - BOT_TOKEN=6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM
+      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot2
     ports:
       - "8001:8000"
     depends_on:
@@ -23,7 +23,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=qwerty
       - POSTGRES_USER=bot
-      - POSTGRES_DB=bot
+      - POSTGRES_DB=bot2
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - 5432:5432
