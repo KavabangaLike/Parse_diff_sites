@@ -1,4 +1,4 @@
-from pydantic import SecretStr, PostgresDsn, RedisDsn
+from pydantic import SecretStr, PostgresDsn
 from pydantic_settings import BaseSettings
 # DATABASE_URL = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot2'  # docker db
 # DATABASE_URL = 'postgresql://bot:qwerty@127.0.0.1:5432/bot'  # local db
@@ -10,8 +10,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    BOT_TOKEN: SecretStr  # = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
-    DATABASE_URL: PostgresDsn  # = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot2'  # docker db
+    # BOT_TOKEN: SecretStr  # = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
+    BOT_TOKEN: SecretStr = '5888133619:AAE1XW55jVt-pqpkXma1PcmoNGFK8m0v9eE'  # test TOKEn
+    # DATABASE_URL: PostgresDsn  # = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot2'  # docker db
+    DATABASE_URL: PostgresDsn = "postgresql://bot:qwerty@localhost:5432/bot"  # docker db
 
 
 settings = Settings()

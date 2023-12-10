@@ -1,3 +1,5 @@
+from typing import Optional
+
 from src.database.models import Product, TgUser, FbUser, SearchLink, Land, Currency, Facility, Picture, \
     UserGroup, UserFacility, UserLand
 from sqlalchemy import select, or_
@@ -16,7 +18,7 @@ def pg_insert_product(data):  ##
             price=data[2],
             currency=session.scalar(select(Currency.id).filter(Currency.symbol == 'rp')),  ##
             in_month=True,  ##
-            land=session.scalar(select(Land.id).filter(Land.name == data[-1])),
+            land=session.scalar(select(Land.id).filter(Land.name == data[-1].split('(')[1].replace(')', '').strip())),
             description=data[4],
             profile_url=data[5],
             expose_datetime=data[7],
@@ -63,12 +65,15 @@ def pg_insert_new_user(user_id: str, access_expire: datetime, username: str, rol
 def pg_select_users(groups: list[str]) -> list[TgUser]:  #
     users = []
     with TgUser.session() as session:
-        query = session.query(TgUser.id, TgUser.min_price, TgUser.max_price).join(UserGroup) \
+        query = session.query(TgUser).join(UserGroup) \
             .filter(UserGroup.name.in_(groups)) \
             .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None)) \
             .filter(TgUser.show_products == True)
         users.extend(query.all())
+        for user in users:
+            test = user.user_facility
     return users
+
 
 # print(pg_select_users(['users', 'admins', 'superadmins', 'newbies'])
 
@@ -116,11 +121,9 @@ def pg_show_ads(user_id, action: bool) -> None:
         session.refresh(user)
 
 
-def pg_select_facility(type_: int):
+def pg_select_facility() -> list[Facility]:
     with Facility.session() as session:
-        facility = session.scalars(select(Facility.name).filter(Facility.type == type_))
-        return [*facility.all()]
-
+        return session.scalars(select(Facility)).all()
 
 def pg_select_related_facility(user_id, type_: int):
     with UserFacility.session() as session:
@@ -193,7 +196,30 @@ def pg_update_user_price(price_type: str, price_value: int, user_id):
         session.commit()
 
 
+def pg_select_facilities(type_: int, user_id: Optional[int] = None) -> list[str]:
+    if user_id:
+        with Facility.session() as session:
+            return [f.facility.name for f in
+                    session.scalars(select(UserFacility).filter(UserFacility.user_id == user_id)).all()
+                    if f]
+    with Facility.session() as session:
+        return [f.name for f in session.scalars(select(Facility).filter(Facility.type == type_))]
 
-# print(pg_select_userland_user('Ubud'))
-# print(pg_select_lands())
-# pg_select_related_lands(user_id='643668236')
+
+def pg_del_related_rooms(user_id: int):
+    with UserFacility.session() as session:
+        session.query(UserFacility).filter(UserFacility.user_id == user_id).delete(synchronize_session=False)
+        session.commit()
+
+
+def pg_insert_related_rooms(user_id, facilities: list):
+    with UserFacility.session() as session:
+        facilities_id = session.scalars(select(Facility.id).filter(Facility.name.in_(facilities)))
+        uls = []
+        for facility_id in facilities_id:
+            uls.append(UserFacility(user_id=user_id, facility_id=facility_id))
+        session.add_all(uls)
+        session.commit()
+        for ul in uls:
+            session.refresh(ul)
+

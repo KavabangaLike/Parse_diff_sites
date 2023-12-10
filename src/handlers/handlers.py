@@ -1,16 +1,19 @@
-import aiogram.exceptions
-from aiogram.fsm.context import FSMContext
-from sqlalchemy.exc import IntegrityError
-from aiogram.types.input_media_photo import InputMediaPhoto
-from src.settings import bot, dp
-from database import pg_insert_new_user, pg_select_users, pg_change_user_group, pg_change_user_access_period, \
-    pg_show_ads, pg_select_facility, pg_select_related_facility, pg_insert_related_facility, pg_delete_related_facility, \
-    pg_select_userland_user
-from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData, UserFilterCallbackData
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from aiogram.filters.command import Command
 from datetime import datetime, timedelta
+
+import aiogram.exceptions
 from aiogram import F, Router
+from aiogram.filters.command import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, CallbackQuery
+from aiogram.types.input_media_photo import InputMediaPhoto
+from sqlalchemy import select, or_
+from sqlalchemy.exc import IntegrityError
+
+from database import pg_insert_new_user, pg_select_users, pg_change_user_group, pg_change_user_access_period, \
+    pg_show_ads, pg_select_userland_user, pg_select_facilities, pg_select_facility
+from src.database.models import Facility, TgUser, UserGroup
+from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData
+from src.settings import bot
 
 router = Router()
 
@@ -26,11 +29,38 @@ async def send_all(data: list[str | datetime | float]) -> None:
     list_of_prop, price = '', data[8]
     geo, land = data[-1], data[-1].split('(')[1].replace(')', '').strip()
 
+
     users = pg_select_users(['users', 'admins', 'superadmins', 'newbies'])
-    users_land_filter = pg_select_userland_user(land=land)
-    filtered_users = [user for user in users if ((user.min_price <= digit_price <= user.max_price)
-                                                 or (not user.min_price and not user.max_price))
-                      and user.id in users_land_filter]
+
+    product_facilities = []
+    find_descr = descr.lower()
+    with Facility.session() as session:
+        facilities_ = session.scalars(select(Facility)).all()
+        for facility_ in facilities_:
+            for keyword_ in facility_.keywords:
+                if keyword_.name in find_descr:
+                    product_facilities.append(facility_.id)
+
+
+    # users_land_filter = pg_select_userland_user(land=land)
+    filtered_users = []
+    users = []
+    with TgUser.session() as session:
+        query = session.query(TgUser).join(UserGroup) \
+            .filter(UserGroup.name.in_(['users', 'admins', 'superadmins', 'newbies'])) \
+            .filter(or_(datetime.now() < TgUser.access_expire, TgUser.access_expire == None)) \
+            .filter(TgUser.show_products == True)
+        users.extend(query.all())
+
+        for user in users:
+            users_land_filter = {ul.land for ul in user.user_land}
+            user_facility_filter = {uf.facility for uf in user.user_facility}
+            if user.max_price and (land in users_land_filter) and \
+                    ([f.id in product_facilities for f in user_facility_filter] or user_facility_filter is None):
+                if user.min_price <= digit_price <= user.max_price:
+                    filtered_users.append(user)
+            elif user.id in users_land_filter:
+                filtered_users.append(user)
 
     for user in filtered_users:
         try:
@@ -58,10 +88,11 @@ async def start_chat(message: Message) -> None:
     try:
         pg_insert_new_user(str(user_id), access_expire=datetime.now() + timedelta(hours=24),
                            username=message.from_user.username)
-        await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}!')
-        chats_id = pg_select_users(['superadmins'])  ##  !!!!!!!!!!!!!!!
-        for chat_id in chats_id:
-            await bot.send_message(chat_id=chat_id, text=f'#new_user '
+        await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}! На данный момент у Вас 3-ех '
+                                  f'дневный доступ к ресурсам нашего бота. По всем вопросам обращайтесь к @yuriy_solar')
+        users = pg_select_users(['superadmins'])  ##  !!!!!!!!!!!!!!!
+        for user in users:
+            await bot.send_message(chat_id=user.id, text=f'#new_user '
                                                          f'{message.from_user.first_name}, с ником: '
                                                          f'@{message.chat.username} и id: {message.chat.id}',
                                    reply_markup=InlineKeyboards(param1=message.from_user.id, param2='newbies',
@@ -110,3 +141,17 @@ async def cmd_cancel(callback: CallbackQuery, state: FSMContext):
         text="Действие отменено."
     )
     pg_show_ads(callback.message.chat.id, True)
+
+
+@router.message(F.text.contains("#new"))
+async def newsletter(message: Message):
+    with TgUser.session() as session:
+        admins_ids = session.scalars(select(TgUser.id).filter(TgUser.user_group_id.in_(select(UserGroup.id).filter(UserGroup.name.in_(("admins", "superadmins"))))))
+        if message.from_user.id in admins_ids:
+            all_users_ids = session.scalars(select(TgUser.id))
+            for id_ in all_users_ids:
+                try:
+                    await bot.send_message(chat_id=id_, text=message.text.replace("#new", ""))
+                except aiogram.exceptions.TelegramBadRequest:
+                    continue
+

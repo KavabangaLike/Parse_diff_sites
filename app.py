@@ -114,13 +114,13 @@ def start_parse_detail(fb_search_url: str, auth_params: tuple[str],
 
 
 def parsing():
-    urls_for_parser = pg_select_links()
     # urls_for_parser = ['https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7',
     #                    'https://www.facebook.com/marketplace/denpasar/propertyforsale?sortBy=creation_time_descend&query=House%20for%20rent&latitude=-8.5132&longitude=115.263&radius=7',]
     fb_users = pg_select_fb_users()
     shuffle(fb_users)
-    shuffle(urls_for_parser)
     while ...:
+        urls_for_parser = pg_select_links()
+        shuffle(urls_for_parser)
         for fb_user in fb_users:
             i, user_links_count = 0, 0  # индикатор ошибок, счетчик обработанных ссылок
             for link in urls_for_parser.copy():

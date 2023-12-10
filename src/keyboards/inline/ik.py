@@ -69,7 +69,7 @@ class InlineKeyboards:
 
         ikb.append([
             InlineKeyboardButton(text='Отмена', callback_data='cancel'),
-            InlineKeyboardButton(text='Далее', callback_data='ready_land_filter'),
+            InlineKeyboardButton(text='Далее', callback_data='ready_filter'),
 
         ])
         return InlineKeyboardMarkup(inline_keyboard=ikb)
