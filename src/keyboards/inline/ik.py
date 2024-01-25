@@ -9,7 +9,7 @@ from typing import Optional, Literal
 class UserCallbackData(CallbackData, prefix='us'):
     user_id: PositiveInt
     group: Literal['admins', 'users', 'newbies']
-    period: Literal['week', '1month', '3month', 'forever', 'day', 'fault']
+    period: Literal['week', '1month', '2month', 'forever', 'day', 'fault']
 
 
 class UserFilterCallbackData(CallbackData, prefix='bt'):
@@ -38,7 +38,7 @@ class InlineKeyboards:
             ]
         ikb_period = [
             InlineKeyboardButton(text='♾', callback_data=UserCallbackData(period='forever', user_id=self.param1, group=self.param2).pack()),
-            InlineKeyboardButton(text='3 MO.', callback_data=UserCallbackData(period='3month', user_id=self.param1, group=self.param2).pack()),
+            InlineKeyboardButton(text='2 MO.', callback_data=UserCallbackData(period='2month', user_id=self.param1, group=self.param2).pack()),
             InlineKeyboardButton(text='MO.', callback_data=UserCallbackData(period='1month', user_id=self.param1, group=self.param2).pack()),
             InlineKeyboardButton(text='WE.', callback_data=UserCallbackData(period='week', user_id=self.param1, group=self.param2).pack()),
             InlineKeyboardButton(text='✖️', callback_data=UserCallbackData(period='fault', user_id=self.param1, group=self.param2).pack()),

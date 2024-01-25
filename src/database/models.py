@@ -90,6 +90,7 @@ class TgUser(Base):   # !!!!!!!!!!!!!!!!!!!!!!!!
     max_price = Column(BIGINT)
     user_facility = relationship("UserFacility", back_populates="tg_user")
     user_land = relationship("UserLand")
+    group = relationship("UserGroup", back_populates="users")
 
 
     def __str__(self) -> str:
@@ -118,7 +119,7 @@ class UserFacility(Base):  # Показ только объявлений с о�
 class UserGroup(Base):
     __tablename__ = 'user_group'
     name = Column(VARCHAR(64), nullable=False, unique=True, default='newbies')
-    users = relationship('TgUser', backref='UserGroup')
+    users = relationship('TgUser', back_populates="group")
 
     def __str__(self) -> str:
         return f"{self.name}"

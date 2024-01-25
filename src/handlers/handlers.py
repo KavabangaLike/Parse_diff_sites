@@ -84,23 +84,70 @@ async def send_all(data: list[str | datetime | float]) -> None:
 
 @router.message(Command('start'))
 async def start_chat(message: Message) -> None:
+    groups_to_enter = {"@mr_solar_blog": -1001144316841, "@solar_property": -1002118216226}
     user_id = message.chat.id
-    try:
-        pg_insert_new_user(str(user_id), access_expire=datetime.now() + timedelta(hours=24),
-                           username=message.from_user.username)
-        await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}! На данный момент у Вас 3-ех '
-                                  f'дневный доступ к ресурсам нашего бота. По всем вопросам обращайтесь к @yuriy_solar')
-        users = pg_select_users(['superadmins'])  ##  !!!!!!!!!!!!!!!
-        for user in users:
-            await bot.send_message(chat_id=user.id, text=f'#new_user '
-                                                         f'{message.from_user.first_name}, с ником: '
-                                                         f'@{message.chat.username} и id: {message.chat.id}',
-                                   reply_markup=InlineKeyboards(param1=message.from_user.id, param2='newbies',
-                                                                param3='day')
-                                   .handle_user())
-    except IntegrityError:
-        pg_show_ads(message.from_user.id, True)
-        await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
+    with TgUser.session() as session:
+        current_user: TgUser = session.scalar(select(TgUser).filter(TgUser.id == user_id))
+        if not current_user:
+            pg_insert_new_user(user_id=str(user_id), access_expire=datetime.now() - timedelta(hours=72),
+                               username=message.from_user.username)
+            await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}! Для доступа проверьте подписки на группы: \n'
+                                      f'{", ".join([group_name for group_name in groups_to_enter.keys()])} и нажмите /start.\n'
+                                      f' По всем вопросам обращайтесь к @yuriy_solar')
+
+            admins = pg_select_users(['superadmins'])  ##  !!!!!!!!!!!!!!!
+            for user in admins:
+                await bot.send_message(chat_id=user.id, text=f'#new_user '
+                                                             f'{message.from_user.first_name}, с ником: '
+                                                             f'@{message.chat.username} и id: {message.chat.id}',
+                                       reply_markup=InlineKeyboards(param1=message.from_user.id, param2='newbies',
+                                                                    param3='day')
+                                       .handle_user())
+
+        elif current_user.group.name == "newbies":
+            groups_member = [await bot.get_chat_member(chat_id=group_id, user_id=user_id) for group_id in groups_to_enter.values()]
+
+            if any([group.status == "left" for group in groups_member]):
+                await message.answer(text='Для доступа проверьте подписки на группы: \n'
+                                      f'{", ".join([group_name for group_name in groups_to_enter.keys()])} и нажмите /start.\n'
+                                      f' По всем вопросам обращайтесь к @yuriy_solar')
+            else:
+                current_user.access_expire = datetime.now() + timedelta(hours=72)
+                current_user.user_group_id = select(UserGroup.id).filter(UserGroup.name == "users")
+                session.add(current_user)
+                session.commit()
+                await message.answer(text="На данный момент у Вас 3-ех "
+                                     f"дневный доступ к боту. Настройте фильтр объявлений, нажав /tune."
+                                     f" Для увеличения периода подписки обращайтесь к @yuriy_solar")
+        else:
+            pg_show_ads(message.from_user.id, True)
+            await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
+
+    # try:
+    #     group_ids = ["-4085606102", ]
+    #     groups = []
+    #     for group_id in group_ids:
+    #         member_of_group = await bot.get_chat_member(chat_id=group_id, user_id=user_id)
+    #         groups.append(member_of_group)
+    #         print(any([group.status == "left" for group in groups]))
+    #         print([group.status == "left" for group in groups])
+    #     if any([group.status == "left" for group in groups]):
+    #         await bot.send_message(text="YEAAAR", chat_id=message.chat.id)
+    #     pg_insert_new_user(str(user_id), access_expire=datetime.now() + timedelta(hours=24),
+    #                        username=message.from_user.username)
+    #     await message.answer(text=f'Добро пожаловать, {message.from_user.first_name}! На данный момент у Вас 3-ех '
+    #                               f'дневный доступ к ресурсам нашего бота. По всем вопросам обращайтесь к @yuriy_solar')
+    #     users = pg_select_users(['superadmins'])  ##  !!!!!!!!!!!!!!!
+    #     for user in users:
+    #         await bot.send_message(chat_id=user.id, text=f'#new_user '
+    #                                                      f'{message.from_user.first_name}, с ником: '
+    #                                                      f'@{message.chat.username} и id: {message.chat.id}',
+    #                                reply_markup=InlineKeyboards(param1=message.from_user.id, param2='newbies',
+    #                                                             param3='day')
+    #                                .handle_user())
+    # except IntegrityError:
+    #     pg_show_ads(message.from_user.id, True)
+    #     await message.answer(text=f'Рады видеть Вас снова, {message.from_user.first_name}!')
 
 
 @router.callback_query(UserCallbackData.filter())
@@ -111,8 +158,8 @@ async def user_to_users(callback: CallbackQuery, callback_data: UserCallbackData
         period_ += timedelta(weeks=1)
     elif callback_data.period == '1month':
         period_ += timedelta(days=30)
-    elif callback_data.period == '3month':
-        period_ += timedelta(days=90)
+    elif callback_data.period == '2month':
+        period_ += timedelta(days=60)
     elif callback_data.period == 'forever':
         period_ = None
     else:
@@ -143,7 +190,7 @@ async def cmd_cancel(callback: CallbackQuery, state: FSMContext):
     pg_show_ads(callback.message.chat.id, True)
 
 
-@router.message(F.text.contains("#new"))
+@router.message(F.text.contains("#new"))  # Рассылка всем пользователям сообщения
 async def newsletter(message: Message):
     with TgUser.session() as session:
         admins_ids = session.scalars(select(TgUser.id).filter(TgUser.user_group_id.in_(select(UserGroup.id).filter(UserGroup.name.in_(("admins", "superadmins"))))))
@@ -155,3 +202,37 @@ async def newsletter(message: Message):
                 except aiogram.exceptions.TelegramBadRequest:
                     continue
 
+
+@router.message(F.text.contains("UISH&*$*RYFOIUDHRNLGFD"))
+async def reset_all(message: Message):
+    groups_to_enter = {"@mr_solar_blog": -1001144316841, "@solar_property": -1002118216226}
+    with TgUser.session() as session:
+        all_users: list[TgUser] = session.scalars(select(TgUser))
+        for user in all_users:
+            user.user_group_id = select(UserGroup.id).filter(UserGroup.name == "newbies")
+            user.access_expire = datetime.now() - timedelta(hours=72)
+            session.add(user)  # можно add_all(), но сделаю так на всякий
+            session.commit()
+            try:
+                await bot.send_message(chat_id=user.id, text=f'Доброго времени суток! Для доступа проверьте подписки на группы: \n'
+                                      f'{", ".join([group_name for group_name in groups_to_enter.keys()])} и нажмите /start.\n'
+                                      f' По всем вопросам обращайтесь к @yuriy_solar')
+            except aiogram.exceptions.TelegramForbiddenError:
+                continue
+ 
+
+@router.message(Command("show_users"))
+async def show_users_to_superadmins(message: Message):
+    with TgUser.session() as session:
+        superadmins_ids = session.scalars(select(TgUser.id).filter(TgUser.user_group_id.in_(select(UserGroup.id).filter(UserGroup.name.in_(("superadmins", ))))))
+        if message.chat.id in superadmins_ids:
+            users = session.scalars(select(TgUser.id).filter(TgUser.user_group_id.in_(select(UserGroup.id).filter(UserGroup.name.in_(("admins", "users", "newbies"))))))
+
+            for superadmin_id in superadmins_ids:
+                for user in users:
+                    await bot.send_message(chat_id=superadmin_id, text=f'#new_user '
+                                                                 f'с ником: '
+                                                                 f'@{user.username} и id: {user.id}',
+                                           reply_markup=InlineKeyboards(param1=user.id, param2='newbies',
+                                                                        param3='day')
+                                           .handle_user())

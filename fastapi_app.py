@@ -1,14 +1,10 @@
-from datetime import datetime
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
-from sqlalchemy import or_
 
-from src.database.models import UserGroup
-from src.database.sql_admin import AdminAuth, ProductAdmin, SLinkAdmin, TgUserAdmin, LandAdmin, UGroupAdmin,\
-    KeywordAdmin, FacilityAdmin, UserFacilityAdmin
 from src.database.base import Base
+from src.database.sql_admin import AdminAuth, ProductAdmin, SLinkAdmin, TgUserAdmin, LandAdmin, UGroupAdmin, \
+    KeywordAdmin, FacilityAdmin, UserFacilityAdmin
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware,
