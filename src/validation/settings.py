@@ -10,10 +10,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # BOT_TOKEN: SecretStr  # = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
+    # BOT_TOKEN: SecretStr  = '6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM'  # test TOKEn
     BOT_TOKEN: SecretStr = '5888133619:AAE1XW55jVt-pqpkXma1PcmoNGFK8m0v9eE'  # test TOKEn
     # DATABASE_URL: PostgresDsn  # = 'postgresql://bot:qwerty@postgres-fb-bot:5432/bot2'  # docker db
-    DATABASE_URL: PostgresDsn = "postgresql://bot:qwerty@localhost:5432/bot"  # docker db
+    DATABASE_URL: PostgresDsn = "postgresql://bot:qwerty@localhost:5432/bot3"  # docker db
 
 
 settings = Settings()

@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from src.database.base import Base
+from src.database.models import Base
 from alembic import context
 from src.validation.settings import settings
 

@@ -2,7 +2,7 @@ from sqladmin import ModelView
 from fastapi import Request
 from sqladmin.authentication import AuthenticationBackend
 
-from src.database.models import Product, TgUser, SearchLink, Land, UserGroup, Facility, UserFacility, Keyword
+from src.database.models import Product, TgUser, SearchLink, Land, UserGroup, Facility, UserFacility, Keyword, BProduct
 
 
 class ProductAdmin(ModelView, model=Product):
@@ -10,6 +10,13 @@ class ProductAdmin(ModelView, model=Product):
     column_default_sort = [(Product.expose_datetime, True)]
     name = "Объявление"
     name_plural = "Объявления"
+    category = "Веб-скрапинг"
+
+
+class BProductAdmin(ModelView, model=BProduct):
+    column_list = ["land", "title", "price", "rooms"]
+    name = "Baliving Объявление"
+    name_plural = "Baliving Объявления"
     category = "Веб-скрапинг"
 
 

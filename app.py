@@ -12,6 +12,7 @@ from src.utils.google_sheet import gh_insert, gh_prepare_data
 from random import shuffle
 from src.validation.settings import UserConnectionError, NoUrlsFromParse
 from src.utils.web_api_services import smartproxy_request, apify_request
+from src.utils.baliving import BalivingScraper
 
 
 def async_tg_send(data):
@@ -62,54 +63,6 @@ def parse_search_only(fb_search_url: str, geo: str):
             async_tg_send(data=data)
 
             # sleep(random.uniform(0.045 * DELAY_LIMITER, 0.1 * DELAY_LIMITER))
-    sleep(random.uniform(3 * DELAY_LIMITER, 5 * DELAY_LIMITER))
-
-
-def start_parse_detail(fb_search_url: str, auth_params: tuple[str],
-                geo: str = None, query: str = None) -> None:
-    try:
-        response = apify_request(url=fb_search_url)
-    except UserConnectionError:
-        print(f'\033[1;31m***Cant connect with user {auth_params[0]}***\033[0m')
-        sleep(random.uniform(25.0, 45.0))
-        raise UserConnectionError
-    urls_from_search = get_urls(response)
-    if not urls_from_search:
-        print(f'\033[1;31m***Parse no links with {auth_params[0]}, {geo, query}***\033[0m')
-        sleep(random.uniform(25.0, 45.0))
-        raise NoUrlsFromParse
-    urls_in_db = [str(i) for i in pg_select_product_links()]
-    #print(urls_in_db)
-    urls_to_parse = []
-    # print(urls_from_search)
-    for url in urls_from_search:
-        if url[0].split('/')[5].strip() not in urls_in_db:
-            urls_to_parse.append((url[0], url[1]))
-    #print(urls_to_parse)
-    print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> ")}'
-          f'{geo} - '
-          f'Total: {len(urls_from_search)} New: {len(urls_to_parse)}'
-          f' - {query} - '
-          f'User: {auth_params[0]}')
-    if urls_to_parse:
-        for url in urls_to_parse:
-            try:
-                data = get_product_info(smartproxy_request(url_to_parse=url[0]), url=url[0])  # - cookie
-                # data = get_product_info(get_response(url=url, auth_params=auth_params), url=url)  # - cookie
-                # data = get_product_info(get_response(url=url, auth_params=auth_params)[0], url=url)  # - cookie
-            except AttributeError:
-                print('UserConnectionError')
-                raise UserConnectionError
-
-            if data:
-                data.append(url[1] + f' ({geo})')
-                pg_insert_product(data)
-
-                async_tg_send(data=data)
-
-                sleep(random.uniform(0.045 * DELAY_LIMITER, 0.1 * DELAY_LIMITER))
-            else:
-                print(f'No incoming data !!! from {url}')
     sleep(random.uniform(3 * DELAY_LIMITER, 5 * DELAY_LIMITER))
 
 
@@ -164,8 +117,9 @@ def gh_clone_db():
 
 
 if __name__ == "__main__":
-    processes = [parsing]
+    processes = [parsing, BalivingScraper().handle_data]
     for process in processes:
         multiprocessing.Process(target=process).start()
+
 
 

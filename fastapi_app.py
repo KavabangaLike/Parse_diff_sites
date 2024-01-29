@@ -4,7 +4,7 @@ from sqladmin import Admin
 
 from src.database.base import Base
 from src.database.sql_admin import AdminAuth, ProductAdmin, SLinkAdmin, TgUserAdmin, LandAdmin, UGroupAdmin, \
-    KeywordAdmin, FacilityAdmin, UserFacilityAdmin
+    KeywordAdmin, FacilityAdmin, UserFacilityAdmin, BProductAdmin
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware,
@@ -21,6 +21,7 @@ admin.add_view(UGroupAdmin)
 admin.add_view(FacilityAdmin)
 admin.add_view(KeywordAdmin)
 admin.add_view(UserFacilityAdmin)
+admin.add_view(BProductAdmin)
 
 
 

@@ -28,6 +28,25 @@ class Product(Base):
         return str(self)
 
 
+class BProduct(Base):
+    __tablename__ = 'b_product'
+    pk = Column(INT, primary_key=True)
+    id = Column(VARCHAR(64), unique=True, nullable=False)
+    link = Column(VARCHAR(256), unique=True, nullable=False)
+    title = Column(VARCHAR(512), unique=False, nullable=False)
+    price = Column(FLOAT)
+    land = Column(VARCHAR(32), unique=False, nullable=True)
+    description = Column(TEXT)
+    rooms = Column(SMALLINT, unique=False, nullable=True)
+    images = Column(TEXT)
+
+    def __str__(self) -> str:
+        return f"{self.title}"
+
+    def __repr__(self):
+        return str(self)
+
+
 class Facility(Base):  # Удобства
     __tablename__ = 'facility'
     name = Column(VARCHAR(256), nullable=False, unique=True)
