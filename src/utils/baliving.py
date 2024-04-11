@@ -1,16 +1,13 @@
 from asyncio import get_event_loop
 from datetime import datetime, timedelta
-from random import uniform
-from time import sleep
-
-from requests import post
+from math import ceil
+from datetime import datetime
 from orjson import loads
+from requests import post
 from sqlalchemy import select
 
-from config import DELAY_LIMITER
-from src.database.models import BProduct
+from src.database.models import Advertisement
 from src.handlers.handlers import send_all
-from math import ceil
 
 
 class BalivingScraper:
@@ -44,14 +41,15 @@ class BalivingScraper:
             apartment_data = apartment.get("card_description").split("**")
             try:
                 res_lst.append({
-                    "id": apartment.get("id"),
+                    "baliving_id": apartment.get("id"),
                     "link": "https://baliving.ru" + apartment.get("button_link_prod"),
                     "title": apartment.get("card_description"),
                     "price": apartment.get("price"),
                     "rooms": apartment_data[4],
                     "land": lands[apartment_data[2].strip()],
                     "description": apartment.get("popup_text").split("Цена в месяц:**")[1].split("<")[0],
-                    "images": apartment.get("image_list")
+                    "images": apartment.get("image_list"),
+                    "created_datetime": datetime.now()
 
                 })
             except KeyError:
@@ -59,51 +57,47 @@ class BalivingScraper:
         return res_lst
 
     def handle_data(self) -> None:
-        while ...:
-            apartments, apartments_new = self.parse_data(), []
-            with BProduct.session() as session:
-                apartments_exist = session.scalars(select(BProduct.id)
-                                                   .filter(BProduct.id.in_([i.get("id") for i in apartments])))
-            apartments_exist = [*apartments_exist]
-            for apartment in apartments:
-                if not (apartment.get("id") in apartments_exist):
-                    apartments_new.append(apartment)
 
-            print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> Baliving")}'
-                  f'Total: {len(apartments)} New: {len(apartments_new)}')
+        apartments, apartments_new = self.parse_data(), []
+        with Advertisement.session() as session:
+            apartments_exist = session.scalars(select(Advertisement.baliving_id)
+                                               .filter(Advertisement.baliving_id.in_([i.get("id") for i in apartments])))
+        apartments_exist = [*apartments_exist]
+        for apartment in apartments:
+            if not (apartment.get("id") in apartments_exist):
+                apartments_new.append(apartment)
 
-            if apartments_new:
-                apartments_new = apartments_new[:3]  # Берем первые 13, чтобы не спамить в тг
-                products = []
-                with BProduct.session() as session:
-                    for apartment in apartments_new:
-                        b_product = BProduct(**apartment)
-                        products.append(b_product)
-                    session.add_all(products)
-                    session.commit()
+        print(f'{datetime.now().strftime("%m/%d/%Y,%H:%M:%S> Baliving")}'
+              f'Total: {len(apartments)} New: {len(apartments_new)}')
 
+        if apartments_new:
+            apartments_new = apartments_new[:3]  # Берем первые 13, чтобы не спамить в тг
+            products = []
+            with Advertisement.session() as session:
                 for apartment in apartments_new:
-                    rp_price = ceil(float(apartment.get("price")) / 0.000063)
-                    apartment_to_handle = [
-                            apartment.get("link"),
-                            apartment.get("title").replace("**", "").strip() + "\n" + apartment.get("description")+ f"{apartment.get('rooms').strip()} kt",
-                            rp_price,
-                            "None",
-                            "None",
-                            "None",
-                            ",".join(apartment.get("images")[:-1]),
-                            datetime.now() + timedelta(hours=8),
-                            str(apartment.get("price")) + f"$ ({rp_price} rp)",
-                            " (" + apartment.get("land") + ")"
-                        ]
+                    b_product = Advertisement(**apartment)
+                    products.append(b_product)
+                session.add_all(products)
+                session.commit()
 
+            for apartment in apartments_new:
+                rp_price = ceil(float(apartment.get("price")) / 0.000063)
+                apartment_to_handle = [
+                        apartment.get("link"),
+                        apartment.get("title").replace("**", "").strip() + "\n" + apartment.get("description") + f"{apartment.get('rooms').strip()} kt",
+                        rp_price,
+                        "None",
+                        "None",
+                        "None",
+                        ",".join(apartment.get("images")[:-1]),
+                        datetime.now() + timedelta(hours=8),
+                        str(apartment.get("price")) + f"$ (≈{rp_price} rp)",
+                        " (" + apartment.get("land") + ")"
+                    ]
 
-                    async def send_data(dat):
-                        await send_all(dat)
+                async def send_data(dat):
+                    await send_all(dat)
 
-                    loop = get_event_loop()
-                    coroutine = send_data(apartment_to_handle)
-                    loop.run_until_complete(coroutine)
-
-            sleep(uniform(1 * DELAY_LIMITER, 3 * DELAY_LIMITER))
-BalivingScraper().handle_data()
+                loop = get_event_loop()
+                coroutine = send_data(apartment_to_handle)
+                loop.run_until_complete(coroutine)

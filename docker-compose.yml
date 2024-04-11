@@ -4,13 +4,12 @@ services:
 
   bot:
     build: .
-    command: sh -c "alembic revision --autogenerate && alembic upgrade head && python preloads.py && python bot.py & python app.py && uvicorn fastapi_app:app --host 0.0.0.0 --port 8000"
+    command: sh -c "alembic revision --autogenerate && alembic upgrade head && python preloads.py && python bot.py && uvicorn fastapi_app:app --host 0.0.0.0 --port 8000"
     container_name: fb-bot
     volumes:
       - .:/bot
-    environment:
-      - BOT_TOKEN=6366199783:AAF0vbIzEo3g4hO7riXs-q0dFZEOdb6_sBM
-      - DATABASE_URL=postgresql://bot:qwerty@postgres:5432/bot2
+    env_file:
+      - .env.bot
     ports:
       - "8001:8000"
     depends_on:
@@ -20,13 +19,42 @@ services:
   postgres:
     image: postgres:15-alpine3.18
     container_name: postgres-fb-bot
-    environment:
-      - POSTGRES_PASSWORD=qwerty
-      - POSTGRES_USER=bot
-      - POSTGRES_DB=bot2
-      - POSTGRES_HOST_AUTH_METHOD=trust
+    env_file:
+      - .env.postgres
     ports:
       - 5432:5432
+
+  redis:
+    image: redis:7.0.11-alpine3.18
+    hostname: redis
+    container_name: redis-bot
+
+  celery-worker:
+    build: .
+    command: celery -A src.settings:celery worker -l INFO
+    container_name: celery-worker
+    volumes:
+      - .:/bot
+    env_file:
+      - .env.bot
+    depends_on:
+      - postgres
+      - redis
+      - celery-beat
+      - bot
+
+  celery-beat:
+    build: .
+    command: celery -A src.settings:celery beat -l INFO
+    container_name: celery-beat
+    volumes:
+      - .:/bot
+    env_file:
+      - .env.bot
+    depends_on:
+      - postgres
+      - redis
+      - bot
 
 
 

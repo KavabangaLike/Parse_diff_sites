@@ -4,7 +4,7 @@ import logging
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from database import pg_select_users
+from src.database import pg_select_users
 from src.database.models import TgUser, UserGroup
 from src.keyboards.inline.ik import InlineKeyboards
 from src.settings import dp, bot

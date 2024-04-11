@@ -7,10 +7,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.types.input_media_photo import InputMediaPhoto
 from sqlalchemy import select, or_
-from sqlalchemy.exc import IntegrityError
 
-from database import pg_insert_new_user, pg_select_users, pg_change_user_group, pg_change_user_access_period, \
-    pg_show_ads, pg_select_userland_user, pg_select_facilities, pg_select_facility
+from src.database import pg_insert_new_user, pg_select_users, pg_change_user_group, pg_change_user_access_period, \
+    pg_show_ads
 from src.database.models import Facility, TgUser, UserGroup
 from src.keyboards.inline.ik import InlineKeyboards, UserCallbackData
 from src.settings import bot

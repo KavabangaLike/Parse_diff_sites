@@ -1,11 +1,14 @@
-from requests import Session
-from bs4 import BeautifulSoup
 # import google_sheet
-import os, sys, time, random, requests
-from bs4 import BeautifulSoup as bs
+import requests
+import sys
 from datetime import datetime, timedelta
+
+from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
+from requests import Session
+
 from src.validation.settings import UserConnectionError
-from re import sub
+
 
 # sys.stdin.reconfigure(encoding='unicode_escape')
 # sys.stdout.reconfigure(encoding='unicode_escape')

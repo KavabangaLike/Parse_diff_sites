@@ -39,6 +39,32 @@ class BProduct(Base):
     description = Column(TEXT)
     rooms = Column(SMALLINT, unique=False, nullable=True)
     images = Column(TEXT)
+    created_datetime = Column(TIMESTAMP, nullable=True, unique=False)
+
+    def __str__(self) -> str:
+        return f"{self.title}"
+
+    def __repr__(self):
+        return str(self)
+
+
+class Advertisement(Base):
+    __tablename__ = 'advertisement'
+    pk = Column(INT, primary_key=True)
+
+    baliving_id = Column(VARCHAR(64), unique=True, nullable=True)
+    villo_id = Column(INT, unique=True, nullable=True)
+    onestopbali_id = Column(BIGINT, unique=True, nullable=True)
+    airbnb_id = Column(BIGINT, unique=True, nullable=True)
+
+    link = Column(VARCHAR(256), unique=True, nullable=False)
+    title = Column(VARCHAR(512), unique=False, nullable=False)
+    price = Column(FLOAT)
+    land = Column(VARCHAR(32), unique=False, nullable=True)
+    description = Column(TEXT)
+    rooms = Column(SMALLINT, unique=False, nullable=True)
+    images = Column(TEXT)
+    created_datetime = Column(TIMESTAMP, nullable=True, unique=False)
 
     def __str__(self) -> str:
         return f"{self.title}"

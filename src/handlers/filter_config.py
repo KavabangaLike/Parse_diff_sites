@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 from src.keyboards.inline import ik
-from database import pg_show_ads, pg_select_lands, pg_select_related_lands, pg_del_related_lands, \
+from src.database import pg_show_ads, pg_select_lands, pg_select_related_lands, pg_del_related_lands, \
     pg_insert_related_lands, pg_update_user_price, pg_select_facilities, pg_del_related_rooms, pg_insert_related_rooms
 from src.keyboards.inline.ik import UserFilterCallbackData
 from src.settings import bot
